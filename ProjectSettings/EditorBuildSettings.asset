@@ -9,6 +9,8 @@ EditorBuildSettings:
     path: Assets/Scenes/LV_Diaroma.unity
     guid: d92be1dbdd0d7ec4f865bd71f3292932
   m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: b0d55232f37ef434abdc77baf817ab19,
+      type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 9e7be553448fa2546aea5752021cbcf7,
       type: 2}
   m_UseUCBPForAssetBundles: 0
