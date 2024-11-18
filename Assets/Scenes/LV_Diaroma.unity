@@ -5506,6 +5506,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1353258694}
   - component: {fileID: 1353258695}
+  - component: {fileID: 1353258696}
   m_Layer: 0
   m_Name: Boat_Loader
   m_TagString: Untagged
@@ -5542,6 +5543,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boatPrefabAddress: Boat
   spawnPoint: {fileID: 1353258694}
+--- !u!114 &1353258696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1353258693}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 020b5e7967e8ea342aaced7c7a6f5c44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  boatPrefabAddress: BoatPrefabAddress
+  spawnPoint: {fileID: 0}
+  remoteCatalogUrl: https://firebasestorage.googleapis.com/v0/b/seaside-unity.firebasestorage.app/o/Seaside-Addressables%2Fcatalog_2024.11.18.05.09.52.json?alt=media&token=fb4c8036-36ce-4999-ae7b-adb23adf078b
 --- !u!1 &1358348875
 GameObject:
   m_ObjectHideFlags: 0
