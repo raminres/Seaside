@@ -7,14 +7,18 @@ This is a personal Unity project that features a seaside scene with a basic thir
   - Basic movement (walking/running) and camera control are integrated using Unity's own Starter Assets.
   - Interaction with objects such as doors and sitting is implemented.
   - Imported animations for walking, sitting, and interacting with the environment.
+  - Remote Addressable Loading. The Boat prefab is an asset that is being loaded from Firebase database. The remote loading is handled by a script. The addressable is built locally and uploaded to firebase.
 2. Interactive Elements
   - Door Interaction: Doors can be opened and closed using keyboard interaction (E key). When the character exits the trigger zone, the door automatically closes.
   - Sitting Interaction: The character can sit on specific objects. If the player attempts to sit in an invalid area, a UI prompt will notify them.
+  - Change the color of the Sofa: The color of the sofa can be changed with pressing the C key on the keyboard. When you are near the sofa try it.
+  - Change the Texture of the Carpet: The texture of the carpet could be toggled with T key.
 3. Seaside Environment
   - Custom water shader created using Unity's Shader Graph for dynamic and stylized water effects.
-  - Sand, rocks, and other seaside elements to create a realistic environment.
+  - Sand, rocks, and other seaside elements to create a stylized environment.
+  - Falling leaves, fire and dust VFX to enhance the feeling of the environment.
 4. House Models
-  - House models with variable textures and materials are used to add variety.
+  - House models with textures and materials used to add variety.
   - Models are created in Blender using geometry nodes and imported as .fbx files into Unity.
 5. Animations
   - Character animations for walking, sitting, interacting with doors, and other actions are imported and integrated with Unity's Animator.
@@ -47,7 +51,7 @@ Models and Assets
 
 3. Terrain and Water
 
-4. Boat on the water surface
+4. Boat on the water surface (Addressable)
 
 ## License
-This project is open-source under the MIT License. Feel free to use, modify, and distribute it as needed. See the LICENSE file for more details.
+This project is open-source under the MIT License. Feel free to use, modify, and distribute it as needed.
