@@ -1,21 +1,27 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class UIController : MonoBehaviour
+public class MainMenuController : MonoBehaviour
 {
     [Header("Canvases")]
     public GameObject mainMenuCanvas;
     public GameObject optionsCanvas;
     public GameObject creditsCanvas;
 
+    [Header("Animator Controllers")]
+    public Animator mainMenuAnimator;
+    public Animator optionsAnimator;
+    public Animator creditsAnimator;
+
     [Header("Volume")]
     public Slider volumeSlider;
 
     private void Start()
     {
-        // Initialize main menu to be active
-        ShowMainMenu();
+        // Initialize main menu and animations
+        ShowMainMenuInstant();
 
         // Load saved volume setting
         if (PlayerPrefs.HasKey("Volume"))
@@ -33,47 +39,97 @@ public class UIController : MonoBehaviour
 
     public void StartGame()
     {
-        // Replace "YourSceneName" with the actual name of the game scene
-        SceneManager.LoadScene("LV_Diaroma");
+        StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
+        {
+            SceneManager.LoadScene("LV_Diaroma");
+        }));
     }
 
     public void OpenOptions()
     {
-        mainMenuCanvas.SetActive(false);
-        optionsCanvas.SetActive(true);
+        StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
+        {
+            ShowCanvasWithAnimation(optionsCanvas, optionsAnimator);
+        }));
     }
 
     public void OpenCredits()
     {
-        mainMenuCanvas.SetActive(false);
-        creditsCanvas.SetActive(true);
+        StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
+        {
+            ShowCanvasWithAnimation(creditsCanvas, creditsAnimator);
+        }));
     }
 
     public void BackToMainMenu()
     {
-        ShowMainMenu();
-    }
-    public void ShowMainMenu()
-    {
-        mainMenuCanvas.SetActive(true);
-        optionsCanvas.SetActive(false);
-        creditsCanvas.SetActive(false);
+        if (optionsCanvas.activeSelf)
+        {
+            StartCoroutine(PlayDisappearAnimation(optionsCanvas, optionsAnimator, () =>
+            {
+                ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
+            }));
+        }
+        else if (creditsCanvas.activeSelf)
+        {
+            StartCoroutine(PlayDisappearAnimation(creditsCanvas, creditsAnimator, () =>
+            {
+                ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
+            }));
+        }
     }
 
     public void QuitGame()
     {
+        StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
+        {
 #if UNITY_EDITOR
-        // Exit play mode in the editor
-        UnityEditor.EditorApplication.isPlaying = false;
+            UnityEditor.EditorApplication.isPlaying = false;
 #else
-        // Quit the application
-        Application.Quit();
+            Application.Quit();
 #endif
+        }));
     }
 
     public void AdjustVolume(float volume)
     {
         AudioListener.volume = volume;
         PlayerPrefs.SetFloat("Volume", volume); // Save the volume setting
+    }
+
+    private void ShowCanvasWithAnimation(GameObject canvas, Animator animator)
+    {
+        canvas.SetActive(true);
+        animator.SetTrigger("Appear");
+    }
+
+    private IEnumerator PlayDisappearAnimation(GameObject canvas, Animator animator, System.Action onComplete)
+    {
+        animator.SetTrigger("Disappear");
+        float animationLength = GetAnimationClipLength(animator, "Disappear");
+        yield return new WaitForSeconds(animationLength);
+
+        canvas.SetActive(false);
+        onComplete?.Invoke();
+    }
+
+    private float GetAnimationClipLength(Animator animator, string clipName)
+    {
+        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
+        {
+            if (clip.name == clipName)
+            {
+                return clip.length;
+            }
+        }
+        Debug.LogWarning($"Animation clip '{clipName}' not found in Animator.");
+        return 0.0f;
+    }
+
+    private void ShowMainMenuInstant()
+    {
+        mainMenuCanvas.SetActive(true);
+        optionsCanvas.SetActive(false);
+        creditsCanvas.SetActive(false);
     }
 }
