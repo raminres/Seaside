@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -15,12 +16,19 @@ public class MainMenuController : MonoBehaviour
     public Animator optionsAnimator;
     public Animator creditsAnimator;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip hoverSound;
+    public AudioClip clickSound;
+
     [Header("Volume")]
     public Slider volumeSlider;
+    
+    [Header("Level Name")]
+    public string levelName = "LV_Diaroma"; 
 
     private void Start()
     {
-        // Initialize main menu and animations
         ShowMainMenuInstant();
 
         // Load saved volume setting
@@ -37,16 +45,34 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    public void PlayHoverSound()
+    {
+        if (hoverSound != null)
+        {
+            audioSource.PlayOneShot(hoverSound);
+        }
+    }
+
+    public void PlayClickSound()
+    {
+        if (clickSound != null)
+        {
+            audioSource.PlayOneShot(clickSound);
+        }
+    }
+
     public void StartGame()
     {
+        PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
-            SceneManager.LoadScene("LV_Diaroma");
+            SceneManager.LoadScene(levelName);
         }));
     }
 
     public void OpenOptions()
     {
+        PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
             ShowCanvasWithAnimation(optionsCanvas, optionsAnimator);
@@ -55,6 +81,7 @@ public class MainMenuController : MonoBehaviour
 
     public void OpenCredits()
     {
+        PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
             ShowCanvasWithAnimation(creditsCanvas, creditsAnimator);
@@ -63,6 +90,7 @@ public class MainMenuController : MonoBehaviour
 
     public void BackToMainMenu()
     {
+        PlayClickSound();
         if (optionsCanvas.activeSelf)
         {
             StartCoroutine(PlayDisappearAnimation(optionsCanvas, optionsAnimator, () =>
@@ -81,6 +109,7 @@ public class MainMenuController : MonoBehaviour
 
     public void QuitGame()
     {
+        PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
 #if UNITY_EDITOR
