@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -10,11 +9,13 @@ public class MainMenuController : MonoBehaviour
     public GameObject mainMenuCanvas;
     public GameObject optionsCanvas;
     public GameObject creditsCanvas;
+    public GameObject quitConfirmationCanvas;
 
     [Header("Animator Controllers")]
     public Animator mainMenuAnimator;
     public Animator optionsAnimator;
     public Animator creditsAnimator;
+    public Animator quitConfirmationAnimator;
 
     [Header("Audio")]
     public AudioSource audioSource;
@@ -23,9 +24,9 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Volume")]
     public Slider volumeSlider;
-    
-    [Header("Level Name")]
-    public string levelName = "LV_Diaroma"; 
+
+    [Header("Scene Name")]
+    public string gameSceneName = "LV_Diaroma";
 
     private void Start()
     {
@@ -45,41 +46,26 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
-    public void PlayHoverSound()
-    {
-        if (hoverSound != null)
-        {
-            audioSource.PlayOneShot(hoverSound);
-        }
-    }
-
-    public void PlayClickSound()
-    {
-        if (clickSound != null)
-        {
-            audioSource.PlayOneShot(clickSound);
-        }
-    }
-
     public void StartGame()
     {
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
-            SceneManager.LoadScene(levelName);
+            SceneManager.LoadScene(gameSceneName);
         }));
     }
 
-    public void OpenOptions()
+    public void ShowOptions()
     {
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
             ShowCanvasWithAnimation(optionsCanvas, optionsAnimator);
         }));
+        AudioListener.volume = volumeSlider.value;
     }
 
-    public void OpenCredits()
+    public void ShowCredits()
     {
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
@@ -88,40 +74,56 @@ public class MainMenuController : MonoBehaviour
         }));
     }
 
-    public void BackToMainMenu()
-    {
-        PlayClickSound();
-        if (optionsCanvas.activeSelf)
-        {
-            StartCoroutine(PlayDisappearAnimation(optionsCanvas, optionsAnimator, () =>
-            {
-                ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
-            }));
-        }
-        else if (creditsCanvas.activeSelf)
-        {
-            StartCoroutine(PlayDisappearAnimation(creditsCanvas, creditsAnimator, () =>
-            {
-                ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
-            }));
-        }
-    }
-
-    public void QuitGame()
+    public void ShowQuitConfirmation()
     {
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
+            ShowCanvasWithAnimation(quitConfirmationCanvas, quitConfirmationAnimator);
+        }));
+    }
+
+    public void ConfirmQuit()
+    {
+        PlayClickSound();
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
+        UnityEditor.EditorApplication.isPlaying = false;
 #else
-            Application.Quit();
+        Application.Quit();
 #endif
+    }
+
+    public void CancelQuit()
+    {
+        PlayClickSound();
+        StartCoroutine(PlayDisappearAnimation(quitConfirmationCanvas, quitConfirmationAnimator, () =>
+        {
+            ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
+        }));
+    }
+
+    public void BackToMainMenuFromOptions()
+    {
+        PlayClickSound();
+        StartCoroutine(PlayDisappearAnimation(optionsCanvas, optionsAnimator, () =>
+        {
+            ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
+        }));
+    }
+
+    public void BackToMainMenuFromCredits()
+    {
+        PlayClickSound();
+        StartCoroutine(PlayDisappearAnimation(creditsCanvas, creditsAnimator, () =>
+        {
+            ShowCanvasWithAnimation(mainMenuCanvas, mainMenuAnimator);
         }));
     }
 
     public void AdjustVolume(float volume)
     {
+        Debug.Log($"AdjustVolume called with value: {volume}");
+        volume = volumeSlider.value;
         AudioListener.volume = volume;
         PlayerPrefs.SetFloat("Volume", volume); // Save the volume setting
     }
@@ -160,5 +162,22 @@ public class MainMenuController : MonoBehaviour
         mainMenuCanvas.SetActive(true);
         optionsCanvas.SetActive(false);
         creditsCanvas.SetActive(false);
+        quitConfirmationCanvas.SetActive(false);
+    }
+
+    public void PlayHoverSound()
+    {
+        if (hoverSound != null)
+        {
+            audioSource.PlayOneShot(hoverSound);
+        }
+    }
+
+    public void PlayClickSound()
+    {
+        if (clickSound != null)
+        {
+            audioSource.PlayOneShot(clickSound);
+        }
     }
 }
