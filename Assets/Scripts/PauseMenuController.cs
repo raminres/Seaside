@@ -1,3 +1,4 @@
+using StarterAssets;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -20,6 +21,17 @@ public class PauseMenuController : MonoBehaviour
     [Header("Input Action Asset")]
     public InputActionReference pauseActionReference; // Reference to the Pause action
 
+    private ThirdPersonController thirdPersonController; // Reference to the third-person controller
+
+    private void Awake()
+    {
+        thirdPersonController = FindObjectOfType<ThirdPersonController>();
+        if (thirdPersonController == null)
+        {
+            Debug.LogError("ThirdPersonController not found. Make sure it's in the scene.");
+        }
+    }
+
     private void OnEnable()
     {
         // Subscribe to the Pause action
@@ -31,7 +43,7 @@ public class PauseMenuController : MonoBehaviour
 
     private void OnDisable()
     {
-        // Unsubscribe to the Pause action
+        // Unsubscribe from the Pause action
         if (pauseActionReference != null)
         {
             pauseActionReference.action.performed -= OnPauseAction;
@@ -54,16 +66,44 @@ public class PauseMenuController : MonoBehaviour
     {
         PlayClickSound();
         isPaused = true;
-        pauseMenuCanvas.SetActive(true); // Show the pause menu
-        Time.timeScale = 0f; // Pause the game
+
+        // Show the pause menu
+        pauseMenuCanvas.SetActive(true);
+
+        // Pause the game
+        Time.timeScale = 0f;
+
+        // Disable player input
+        if (thirdPersonController != null)
+        {
+            thirdPersonController.enabled = false;
+        }
+
+        // Show the mouse pointer
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void ResumeGame()
     {
         PlayClickSound();
         isPaused = false;
-        pauseMenuCanvas.SetActive(false); // Hide the pause menu
-        Time.timeScale = 1f; // Resume the game
+
+        // Hide the pause menu
+        pauseMenuCanvas.SetActive(false);
+
+        // Resume the game
+        Time.timeScale = 1f;
+
+        // Enable player input
+        if (thirdPersonController != null)
+        {
+            thirdPersonController.enabled = true;
+        }
+
+        // Hide the mouse pointer
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void QuitToMainMenu()
