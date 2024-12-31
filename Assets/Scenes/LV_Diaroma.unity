@@ -93,7 +93,8 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: 276ffbfe19fb64f478eabcf13c196015,
+    type: 2}
   m_LightingSettings: {fileID: 4890085278179872738, guid: a24cc143814a47b4e93c2d7b8689b3ea,
     type: 2}
 --- !u!196 &4
@@ -4219,7 +4220,7 @@ ReflectionProbe:
   m_TimeSlicingMode: 0
   m_Resolution: 128
   m_UpdateFrequency: 0
-  m_BoxSize: {x: 32, y: 10, z: 32}
+  m_BoxSize: {x: 64, y: 10, z: 64}
   m_BoxOffset: {x: 0, y: 0, z: 0}
   m_NearClip: 0.3
   m_FarClip: 1000
@@ -5434,7 +5435,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mode: 2
-  size: {x: 32, y: 10, z: 32}
+  size: {x: 64, y: 13.625864, z: 64}
   overrideRendererFilters: 0
   minRendererVolumeSize: 0.1
   objectLayerMask:
@@ -5443,7 +5444,7 @@ MonoBehaviour:
   lowestSubdivLevelOverride: 4
   highestSubdivLevelOverride: 3
   overridesSubdivLevels: 0
-  mightNeedRebaking: 1
+  mightNeedRebaking: 0
   cachedTransform:
     e00: 1
     e01: 0
@@ -5452,7 +5453,7 @@ MonoBehaviour:
     e10: 0
     e11: 1
     e12: 0
-    e13: -0
+    e13: -1.312932
     e20: 0
     e21: 0
     e22: 1
@@ -5461,7 +5462,7 @@ MonoBehaviour:
     e31: 0
     e32: 0
     e33: 1
-  cachedHashCode: -676230575
+  cachedHashCode: 1362415497
   fillEmptySpaces: 1
   version: 2
   globalVolume: 0
@@ -5474,7 +5475,7 @@ Transform:
   m_GameObject: {fileID: 1111604955}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.312932, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11620,7 +11621,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a83d2f7ae04ab6f4f99b0d85377be998, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serializedBakingSet: {fileID: 0}
+  serializedBakingSet: {fileID: 11400000, guid: baf22da00436c1549a69df11d2f66f95,
+    type: 2}
   sceneGUID: d92be1dbdd0d7ec4f865bd71f3292932
   obsoleteAsset: {fileID: 0}
   obsoleteCellSharedDataAsset: {fileID: 0}
