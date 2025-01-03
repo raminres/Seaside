@@ -25,7 +25,7 @@ public class PauseMenuController : MonoBehaviour
 
     private void Awake()
     {
-        thirdPersonController = FindObjectOfType<ThirdPersonController>();
+        thirdPersonController = FindFirstObjectByType<ThirdPersonController>();
         if (thirdPersonController == null)
         {
             Debug.LogError("ThirdPersonController not found. Make sure it's in the scene.");
