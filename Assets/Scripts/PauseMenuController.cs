@@ -7,6 +7,7 @@ public class PauseMenuController : MonoBehaviour
 {
     [Header("Canvases")]
     public GameObject pauseMenuCanvas;
+    public GameObject winGameCanvas; // 🎯 Added Win Game Canvas Reference
 
     [Header("Audio")]
     public AudioSource audioSource;
@@ -15,13 +16,14 @@ public class PauseMenuController : MonoBehaviour
 
     [Header("Scene Name")]
     public string mainMenuSceneName = "MainMenu";
+    public string gameSceneName = "LV_Diaroma"; // 🎯 Added Game Scene Name for Restart
 
     private bool isPaused = false;
 
     [Header("Input Action Asset")]
-    public InputActionReference pauseActionReference; // Reference to the Pause action
+    public InputActionReference pauseActionReference;
 
-    private ThirdPersonController thirdPersonController; // Reference to the third-person controller
+    private ThirdPersonController thirdPersonController;
 
     private void Awake()
     {
@@ -34,7 +36,6 @@ public class PauseMenuController : MonoBehaviour
 
     private void OnEnable()
     {
-        // Subscribe to the Pause action
         if (pauseActionReference != null)
         {
             pauseActionReference.action.performed += OnPauseAction;
@@ -43,7 +44,6 @@ public class PauseMenuController : MonoBehaviour
 
     private void OnDisable()
     {
-        // Unsubscribe from the Pause action
         if (pauseActionReference != null)
         {
             pauseActionReference.action.performed -= OnPauseAction;
@@ -67,19 +67,14 @@ public class PauseMenuController : MonoBehaviour
         PlayClickSound();
         isPaused = true;
 
-        // Show the pause menu
         pauseMenuCanvas.SetActive(true);
-
-        // Pause the game
         Time.timeScale = 0f;
 
-        // Disable player input
         if (thirdPersonController != null)
         {
             thirdPersonController.enabled = false;
         }
 
-        // Show the mouse pointer
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -89,19 +84,14 @@ public class PauseMenuController : MonoBehaviour
         PlayClickSound();
         isPaused = false;
 
-        // Hide the pause menu
         pauseMenuCanvas.SetActive(false);
-
-        // Resume the game
         Time.timeScale = 1f;
 
-        // Enable player input
         if (thirdPersonController != null)
         {
             thirdPersonController.enabled = true;
         }
 
-        // Hide the mouse pointer
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -109,7 +99,22 @@ public class PauseMenuController : MonoBehaviour
     public void QuitToMainMenu()
     {
         PlayClickSound();
-        Time.timeScale = 1f; // Ensure time resumes before switching scenes
+        Time.timeScale = 1f; 
+        SceneManager.LoadScene(mainMenuSceneName);
+    }
+
+    // 🎯 **New Methods for WinGameCanvas Buttons**
+    public void RestartGame()
+    {
+        PlayClickSound();
+        Time.timeScale = 1f; 
+        SceneManager.LoadScene(gameSceneName);
+    }
+
+    public void BackToMainMenuFromWin()
+    {
+        PlayClickSound();
+        Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuSceneName);
     }
 
