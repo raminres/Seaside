@@ -8,6 +8,7 @@ TagManager:
   - SitArea
   - DoorClose
   - DoorClose2
+  - WinGame
   layers:
   - Default
   - TransparentFX

@@ -51,7 +51,8 @@ public class MainMenuController : MonoBehaviour
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
-            SceneManager.LoadScene(gameSceneName);
+            GameManager.Instance.ChangeGameState(GameState.Playing);
+            GameManager.Instance.LoadScene(gameSceneName);
         }));
     }
 
@@ -86,11 +87,7 @@ public class MainMenuController : MonoBehaviour
     public void ConfirmQuit()
     {
         PlayClickSound();
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
+        GameManager.Instance.QuitGame(); // Use GameManager's quit method
     }
 
     public void CancelQuit()
@@ -126,6 +123,9 @@ public class MainMenuController : MonoBehaviour
         volume = volumeSlider.value;
         AudioListener.volume = volume;
         PlayerPrefs.SetFloat("Volume", volume); // Save the volume setting
+
+        // Inform GameManager about volume change
+        GameManager.Instance.UpdateVolume(volume);
     }
 
     private void ShowCanvasWithAnimation(GameObject canvas, Animator animator)
