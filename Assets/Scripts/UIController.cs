@@ -51,8 +51,7 @@ public class MainMenuController : MonoBehaviour
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
-            GameManager.Instance.ChangeGameState(GameState.Playing);
-            GameManager.Instance.LoadScene(gameSceneName);
+            GameManager.Instance.ShowLevelSelection(); // Open Level Selection UI instead of loading a level
         }));
     }
 

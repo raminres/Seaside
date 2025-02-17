@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Scene Management")]
     public string mainMenuSceneName = "LV_MainMenu"; 
-    public string gameSceneName = "LV_Diaroma";  
+    public string[] levelScenes = { "LV_Level1", "LV_Level2", "LV_Level3" }; // Array to store level names
 
     [Header("Collectible Settings")]
     public GameObject collectiblePrefab;
@@ -30,8 +31,12 @@ public class GameManager : MonoBehaviour
     private int collectedCount = 0;
 
     [Header("Win State UI")]
-    public GameObject winGameCanvas;  // Dynamically found Win Canvas
-    public Animator winGameAnimator;  // Animator for WinGameCanvas
+    private GameObject winGameCanvas;
+    private Animator winGameAnimator;
+
+    [Header("Level Selection UI")]
+    public GameObject levelSelectionCanvas;
+    public Animator levelSelectionAnimator;
 
     private void Awake()
     {
@@ -53,11 +58,20 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == gameSceneName)
+        AssignCounterText(); 
+        AssignWinGameCanvas();
+        ResetCollectibles();
+    }
+    public void ChangeGameState(GameState newState)
+    {
+        if (gameState != null)
         {
-            AssignCounterText(); 
-            AssignWinGameCanvas();  // Find Win Canvas in the new scene
-            ResetCollectibles();
+            gameState.CurrentState = newState;
+            onGameStateChangeEvent?.RaiseEvent();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ GameStateSO reference is missing in GameManager!");
         }
     }
 
@@ -78,24 +92,16 @@ public class GameManager : MonoBehaviour
 
     private void AssignWinGameCanvas()
     {
-        GameObject winCanvasObject = GameObject.FindWithTag("WinGame"); // Find by tag
-        if (winCanvasObject != null)
+        winGameCanvas = GameObject.Find("CanvasWinGame");
+        if (winGameCanvas != null)
         {
-            winGameCanvas = winCanvasObject;
             winGameAnimator = winGameCanvas.GetComponent<Animator>();
-            winGameCanvas.SetActive(false); // Hide it at start
+            winGameCanvas.SetActive(false);
         }
         else
         {
-            Debug.LogWarning("⚠️ WinGameCanvas not found using tag! Make sure it's tagged correctly.");
+            Debug.LogWarning("⚠️ WinGameCanvas not found in the scene!");
         }
-    }
-
-
-    public void ChangeGameState(GameState newState)
-    {
-        gameState.CurrentState = newState;
-        onGameStateChangeEvent.RaiseEvent();
     }
 
     public void ResetCollectibles()
@@ -105,10 +111,20 @@ public class GameManager : MonoBehaviour
         SpawnCollectibles();
     }
 
+    public void UpdateCounterUI()
+    {
+        if (counterText != null)
+        {
+            counterText.text = collectedCount.ToString();
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ Counter UI not assigned yet!");
+        }
+    }
+
     public void SpawnCollectibles()
     {
-        if (SceneManager.GetActiveScene().name == mainMenuSceneName) return; 
-
         for (int i = 0; i < collectibleCount; i++)
         {
             Vector3 randomPosition = new Vector3(
@@ -139,10 +155,6 @@ public class GameManager : MonoBehaviour
         if (winGameCanvas != null)
         {
             winGameCanvas.SetActive(true);
-            //pauseMenuCanvas.SetActive(false); // Hide Pause Menu
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-
             if (winGameAnimator != null)
             {
                 winGameAnimator.SetTrigger("Appear");
@@ -150,32 +162,62 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ WinGameCanvas not assigned!");
+            Debug.LogWarning("⚠️ WinGameCanvas is not assigned in the scene!");
         }
     }
 
-    private void UpdateCounterUI()
+    public void ShowLevelSelection()
     {
-        if (counterText != null)
+        if (levelSelectionCanvas != null)
         {
-            counterText.text = collectedCount.ToString();
+            levelSelectionCanvas.SetActive(true);
+            if (levelSelectionAnimator != null)
+            {
+                levelSelectionAnimator.SetTrigger("Appear");
+            }
         }
-        else
+    }
+
+    public void HideLevelSelection()
+    {
+        if (levelSelectionCanvas != null)
         {
-            Debug.LogWarning("⚠️ Counter UI not assigned yet!");
+            if (levelSelectionAnimator != null)
+            {
+                levelSelectionAnimator.SetTrigger("Disappear");
+                StartCoroutine(DisableCanvasAfterAnimation(levelSelectionCanvas, levelSelectionAnimator, "Disappear"));
+            }
+            else
+            {
+                levelSelectionCanvas.SetActive(false);
+            }
         }
     }
 
-    public void RestartGame()
+    public void SelectLevel(int levelIndex)
     {
-        SceneManager.LoadScene(gameSceneName); // Reload game scene
+        HideLevelSelection();
+        LoadLevel(levelIndex);
     }
 
-    public void BackToMainMenu()
+    private IEnumerator DisableCanvasAfterAnimation(GameObject canvas, Animator animator, string animationName)
     {
-        SceneManager.LoadScene(mainMenuSceneName); // Load Main Menu
+        float animationLength = GetAnimationClipLength(animator, animationName);
+        yield return new WaitForSeconds(animationLength);
+        canvas.SetActive(false);
     }
 
+    private float GetAnimationClipLength(Animator animator, string clipName)
+    {
+        foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
+        {
+            if (clip.name == clipName)
+            {
+                return clip.length;
+            }
+        }
+        return 0.5f;
+    }
     public void UpdateVolume(float volume)
     {
         AudioListener.volume = volume;
@@ -184,12 +226,18 @@ public class GameManager : MonoBehaviour
         onVolumeChangeEvent?.RaiseEvent();
     }
 
-    public void LoadScene(string sceneName)
+    public void LoadLevel(int levelIndex)
     {
-        SceneManager.LoadScene(sceneName);
+        if (levelIndex >= 0 && levelIndex < levelScenes.Length)
+        {
+            SceneManager.LoadScene(levelScenes[levelIndex]);
+        }
+        else
+        {
+            Debug.LogError("Invalid level index!");
+        }
     }
-
-    public void QuitGame()
+        public void QuitGame()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -198,3 +246,4 @@ public class GameManager : MonoBehaviour
 #endif
     }
 }
+
