@@ -14,6 +14,13 @@ namespace StarterAssets
 #endif
     public class ThirdPersonController : MonoBehaviour
     {
+        [System.Serializable]
+        public struct SurfaceDefinition
+        {
+            public string surfaceTag;       // e.g., "Wood", "Sand", "Rock"
+            public AudioClip[] footstepClips;
+            public GameObject footstepVFX;  // Optional: Drag a particle prefab here later
+        }
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.0f;
@@ -29,7 +36,10 @@ namespace StarterAssets
         public float SpeedChangeRate = 10.0f;
 
         public AudioClip LandingAudioClip;
-        public AudioClip[] FootstepAudioClips;
+        
+        [Header("Surface System")]
+        public SurfaceDefinition[] SurfaceDefinitions; // Array to configure Wood, Sand, Rock
+        public SurfaceDefinition DefaultSurface;       // Fallback if no tag matches
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
 
         [Space(10)]
@@ -368,16 +378,44 @@ namespace StarterAssets
                 new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
                 GroundedRadius);
         }
+        private void PlayFootstepEffect()
+        {
+            // 1. Raycast down to find the surface
+            RaycastHit hit;
+            // Raycast from slightly above feet (0.1f) to slightly below (-0.5f)
+            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 0.5f, GroundLayers))
+            {
+                // 2. Find the matching surface definition based on the Tag
+                SurfaceDefinition currentSurface = DefaultSurface;
+        
+                foreach (var surface in SurfaceDefinitions)
+                {
+                    if (hit.collider.CompareTag(surface.surfaceTag))
+                    {
+                        currentSurface = surface;
+                        break;
+                    }
+                }
 
+                // 3. Play Random Audio from that surface
+                if (currentSurface.footstepClips != null && currentSurface.footstepClips.Length > 0)
+                {
+                    var index = Random.Range(0, currentSurface.footstepClips.Length);
+                    AudioSource.PlayClipAtPoint(currentSurface.footstepClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                }
+
+                // 4. (Future Tech Art) Spawn VFX
+                if (currentSurface.footstepVFX != null)
+                {
+                    Instantiate(currentSurface.footstepVFX, hit.point, Quaternion.LookRotation(hit.normal));
+                }
+            }
+        }
         private void OnFootstep(AnimationEvent animationEvent)
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                if (FootstepAudioClips.Length > 0)
-                {
-                    var index = Random.Range(0, FootstepAudioClips.Length);
-                    AudioSource.PlayClipAtPoint(FootstepAudioClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
-                }
+                PlayFootstepEffect();
             }
         }
 

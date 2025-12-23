@@ -9,6 +9,9 @@ TagManager:
   - DoorClose
   - DoorClose2
   - WinGame
+  - Wood
+  - Sand
+  - Rock
   layers:
   - Default
   - TransparentFX
