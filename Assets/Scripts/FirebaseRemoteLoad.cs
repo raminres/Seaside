@@ -1,4 +1,4 @@
-using UnityEngine;
+/*using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Firebase;
@@ -82,3 +82,4 @@ public class FirebaseRemoteLoad : MonoBehaviour
         };
     }
 }
+*/
