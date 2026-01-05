@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,24 +11,31 @@ public class GameManager : MonoBehaviour
     [Header("Game State")]
     [SerializeField] private GameStateSo gameState;
     [SerializeField] private GameEventSo onGameStateChangeEvent;
+    [SerializeField] private GameEventSo onGamePaused;
+    [SerializeField] private GameEventSo onGameResumed;
+
+    [Header("Scene Management")]
+    [SerializeField] private string mainMenuSceneName = "LV_MainMenu";
+    [SerializeField] private string persistentGameplayScene = "Main"; // New: persistent scene for additive loading
+    [SerializeField] private string[] levelScenes = { "LV_Level1", "LV_Level2", "LV_Level3" };
+
+    [Header("Additive Scene Loading")]
+    [SerializeField] private FloatEventSo onLoadProgress;
+    [SerializeField] private bool useAdditiveLoading = true;
 
     [Header("Volume Settings")]
     [SerializeField] private GameEventSo onVolumeChangeEvent;
 
-    [Header("Scene Management")]
-    public string mainMenuSceneName = "LV_MainMenu"; 
-    public string[] levelScenes = { "LV_Level1", "LV_Level2", "LV_Level3" }; // Array to store level names
-
     [Header("Collectible Settings")]
-    public GameObject collectiblePrefab;
-    public int collectibleCount = 10;
-    public float minX = -10f, maxX = 10f;
-    public float minZ = -10f, maxZ = 10f;
-    public float yPosition = 1f;
-    public AudioClip collectibleAudio;
+    [SerializeField] private GameObject collectiblePrefab;
+    [SerializeField] private int collectibleCount = 10;
+    [SerializeField] private float minX = -10f, maxX = 10f;
+    [SerializeField] private float minZ = -10f, maxZ = 10f;
+    [SerializeField] private float yPosition = 1f;
+    [SerializeField] private AudioClip collectibleAudio;
 
-    [Header("UI Settings")]
-    private TextMeshProUGUI counterText; // Collectible counter UI
+    [Header("UI References")]
+    private TextMeshProUGUI counterText;
     private int collectedCount = 0;
 
     [Header("Win State UI")]
@@ -35,162 +43,326 @@ public class GameManager : MonoBehaviour
     private Animator winGameAnimator;
 
     [Header("Level Selection UI")]
-    public GameObject levelSelectionCanvas;
-    public Animator levelSelectionAnimator;
+    [SerializeField] private GameObject levelSelectionCanvas;
+    [SerializeField] private Animator levelSelectionAnimator;
+
+    // Properties
+    public GameState CurrentState => gameState != null ? gameState.CurrentState : GameState.MainMenu;
+    public bool IsPaused => CurrentState == GameState.Paused;
+    public bool IsPlaying => CurrentState == GameState.Playing;
+
+    private List<AsyncOperation> _loadOperations = new();
+
+    #region Unity Lifecycle
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+    
+        // Ensure we're in MainMenu state when starting from main menu scene
+        if (SceneManager.GetActiveScene().name == mainMenuSceneName)
+        {
+            if (gameState != null)
+            {
+                gameState.CurrentState = GameState.MainMenu;
+            }
+        }
+    
+        UpdateCursorState();
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        AssignCounterText(); 
-        AssignWinGameCanvas();
-        ResetCollectibles();
+        // Reassign main menu UI references when returning to main menu
+        if (scene.name == mainMenuSceneName)
+        {
+            AssignLevelSelectionUI();
+            ChangeGameState(GameState.MainMenu);
+        }
+        else if (scene.name != persistentGameplayScene)
+        {
+            AssignCounterText();
+            AssignWinGameCanvas();
+            ResetCollectibles();
+        }
     }
+    private void AssignLevelSelectionUI()
+    {
+        MainMenuController mainMenu = FindFirstObjectByType<MainMenuController>(FindObjectsInactive.Include);
+    
+        if (mainMenu != null)
+        {
+            levelSelectionCanvas = mainMenu.levelSelectionCanvas;
+            levelSelectionAnimator = mainMenu.levelSelectionAnimator;
+        }
+    }
+
+    #endregion
+
+    #region Game State Management
+
     public void ChangeGameState(GameState newState)
     {
-        if (gameState != null)
+        if (gameState == null)
         {
-            gameState.CurrentState = newState;
-            onGameStateChangeEvent?.RaiseEvent();
+            Debug.LogWarning("GameStateSO reference is missing in GameManager!");
+            return;
+        }
+
+        GameState previousState = gameState.CurrentState;
+        gameState.CurrentState = newState;
+
+        HandleStateTransition(previousState, newState);
+        onGameStateChangeEvent?.RaiseEvent();
+    }
+
+    private void HandleStateTransition(GameState from, GameState to)
+    {
+        switch (to)
+        {
+            case GameState.Paused:
+                Time.timeScale = 0f;
+                onGamePaused?.RaiseEvent();
+                break;
+
+            case GameState.Playing:
+                Time.timeScale = 1f;
+                if (from == GameState.Paused)
+                {
+                    onGameResumed?.RaiseEvent();
+                }
+                break;
+
+            case GameState.MainMenu:
+            case GameState.GameOver:
+                Time.timeScale = 1f;
+                break;
+        }
+
+        UpdateCursorState();
+    }
+
+    private void UpdateCursorState()
+    {
+        bool showCursor = CurrentState == GameState.MainMenu || 
+                          CurrentState == GameState.Paused || 
+                          CurrentState == GameState.GameOver;
+        
+        Cursor.visible = showCursor;
+        Cursor.lockState = showCursor ? CursorLockMode.None : CursorLockMode.Locked;
+    }
+
+    public void TogglePause()
+    {
+        if (CurrentState == GameState.Playing)
+        {
+            ChangeGameState(GameState.Paused);
+        }
+        else if (CurrentState == GameState.Paused)
+        {
+            ChangeGameState(GameState.Playing);
+        }
+    }
+
+    public void SetPlaying()
+    {
+        ChangeGameState(GameState.Playing);
+    }
+
+    public void SetPaused()
+    {
+        ChangeGameState(GameState.Paused);
+    }
+
+    #endregion
+
+    #region Scene Loading
+
+    /// <summary>
+    /// Load a level by index (legacy method - kept for compatibility).
+    /// </summary>
+    public void LoadLevel(int levelIndex)
+    {
+        if (levelIndex < 0 || levelIndex >= levelScenes.Length)
+        {
+            Debug.LogError($"Invalid level index: {levelIndex}");
+            return;
+        }
+
+        if (useAdditiveLoading)
+        {
+            LoadLevelAdditive(levelScenes[levelIndex]);
         }
         else
         {
-            Debug.LogWarning("⚠️ GameStateSO reference is missing in GameManager!");
+            SceneManager.LoadScene(levelScenes[levelIndex]);
+            ChangeGameState(GameState.Playing);
         }
     }
 
-    private void AssignCounterText()
+    /// <summary>
+    /// Load a level with additive scene loading.
+    /// </summary>
+    public void LoadLevelAdditive(params string[] sceneNames)
     {
-        GameObject counterObject = GameObject.Find("CollectibleCounter");
-        if (counterObject != null)
-        {
-            counterText = counterObject.GetComponent<TextMeshProUGUI>();
-        }
-        else
-        {
-            Debug.LogWarning("⚠️ CollectibleCounter UI not found in the scene!");
-        }
-
-        UpdateCounterUI(); 
+        StartCoroutine(LoadLevelAdditiveAsync(sceneNames));
     }
 
-    private void AssignWinGameCanvas()
+    private IEnumerator LoadLevelAdditiveAsync(string[] sceneNames)
     {
-        winGameCanvas = GameObject.Find("CanvasWinGame");
-        if (winGameCanvas != null)
+        ChangeGameState(GameState.MainMenu); // Use MainMenu state during loading for cursor
+        _loadOperations.Clear();
+
+        // First, load the persistent gameplay scene if not already loaded
+        if (!string.IsNullOrEmpty(persistentGameplayScene) && !IsSceneLoaded(persistentGameplayScene))
         {
-            winGameAnimator = winGameCanvas.GetComponent<Animator>();
-            winGameCanvas.SetActive(false);
+            var mainOp = SceneManager.LoadSceneAsync(persistentGameplayScene, LoadSceneMode.Single);
+            mainOp.allowSceneActivation = false;
+            _loadOperations.Add(mainOp);
         }
-        else
+
+        // Queue all additive scenes
+        foreach (var sceneName in sceneNames)
         {
-            Debug.LogWarning("⚠️ WinGameCanvas not found in the scene!");
+            if (string.IsNullOrEmpty(sceneName) || IsSceneLoaded(sceneName)) continue;
+
+            var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+            op.allowSceneActivation = false;
+            _loadOperations.Add(op);
         }
-    }
 
-    public void ResetCollectibles()
-    {
-        collectedCount = 0;
-        UpdateCounterUI();
-        SpawnCollectibles();
-    }
-
-    public void UpdateCounterUI()
-    {
-        if (counterText != null)
+        if (_loadOperations.Count == 0)
         {
-            counterText.text = collectedCount.ToString();
+            ChangeGameState(GameState.Playing);
+            yield break;
         }
-        else
+
+        // Wait and report progress
+        float totalProgress = 0f;
+        int opCount = _loadOperations.Count;
+        
+        while (totalProgress < 0.9f * opCount)
         {
-            Debug.LogWarning("⚠️ Counter UI not assigned yet!");
-        }
-    }
-
-    public void SpawnCollectibles()
-    {
-        for (int i = 0; i < collectibleCount; i++)
-        {
-            Vector3 randomPosition = new Vector3(
-                Random.Range(minX, maxX),
-                yPosition,
-                Random.Range(minZ, maxZ)
-            );
-
-            GameObject collectible = Instantiate(collectiblePrefab, randomPosition, Quaternion.identity);
-            collectible.GetComponent<Collectible>().Initialize(collectibleAudio);
-        }
-    }
-
-    public void CollectItem()
-    {
-        collectedCount++;
-        UpdateCounterUI();
-
-        if (collectedCount >= collectibleCount)
-        {
-            Debug.Log("🏆 All collectibles collected! Player Wins!");
-            WinGame();
-        }
-    }
-
-    private void WinGame()
-    {
-        if (winGameCanvas != null)
-        {
-            winGameCanvas.SetActive(true);
-            if (winGameAnimator != null)
+            totalProgress = 0f;
+            foreach (var op in _loadOperations)
             {
-                winGameAnimator.SetTrigger("Appear");
+                totalProgress += op.progress;
+            }
+
+            float normalizedProgress = totalProgress / (opCount * 0.9f);
+            onLoadProgress?.RaiseEvent(normalizedProgress);
+
+            yield return null;
+        }
+
+        // Activate all scenes
+        foreach (var op in _loadOperations)
+        {
+            op.allowSceneActivation = true;
+        }
+
+        // Wait for all to complete
+        foreach (var op in _loadOperations)
+        {
+            while (!op.isDone)
+            {
+                yield return null;
             }
         }
-        else
+
+        onLoadProgress?.RaiseEvent(1f);
+        yield return new WaitForSeconds(0.1f);
+
+        ChangeGameState(GameState.Playing);
+    }
+
+    /// <summary>
+    /// Unload a specific additive scene.
+    /// </summary>
+    public void UnloadScene(string sceneName)
+    {
+        if (IsSceneLoaded(sceneName))
         {
-            Debug.LogWarning("⚠️ WinGameCanvas is not assigned in the scene!");
+            SceneManager.UnloadSceneAsync(sceneName);
         }
     }
+
+    /// <summary>
+    /// Return to main menu.
+    /// </summary>
+    public void ReturnToMainMenu()
+    {
+        StartCoroutine(ReturnToMainMenuAsync());
+    }
+
+    private IEnumerator ReturnToMainMenuAsync()
+    {
+        Time.timeScale = 1f;
+        
+        var op = SceneManager.LoadSceneAsync(mainMenuSceneName, LoadSceneMode.Single);
+        while (!op.isDone)
+        {
+            onLoadProgress?.RaiseEvent(op.progress);
+            yield return null;
+        }
+
+        ChangeGameState(GameState.MainMenu);
+    }
+
+    private bool IsSceneLoaded(string sceneName)
+    {
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            if (SceneManager.GetSceneAt(i).name == sceneName)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #endregion
+
+    #region Level Selection UI
 
     public void ShowLevelSelection()
     {
         if (levelSelectionCanvas != null)
         {
             levelSelectionCanvas.SetActive(true);
-            if (levelSelectionAnimator != null)
-            {
-                levelSelectionAnimator.SetTrigger("Appear");
-            }
+            levelSelectionAnimator?.SetTrigger("Appear");
         }
     }
 
     public void HideLevelSelection()
     {
-        if (levelSelectionCanvas != null)
+        if (levelSelectionCanvas == null) return;
+
+        if (levelSelectionAnimator != null)
         {
-            if (levelSelectionAnimator != null)
-            {
-                levelSelectionAnimator.SetTrigger("Disappear");
-                StartCoroutine(DisableCanvasAfterAnimation(levelSelectionCanvas, levelSelectionAnimator, "Disappear"));
-            }
-            else
-            {
-                levelSelectionCanvas.SetActive(false);
-            }
+            levelSelectionAnimator.SetTrigger("Disappear");
+            StartCoroutine(DisableCanvasAfterAnimation(levelSelectionCanvas, levelSelectionAnimator, "Disappear"));
+        }
+        else
+        {
+            levelSelectionCanvas.SetActive(false);
         }
     }
 
@@ -209,6 +381,8 @@ public class GameManager : MonoBehaviour
 
     private float GetAnimationClipLength(Animator animator, string clipName)
     {
+        if (animator.runtimeAnimatorController == null) return 0.5f;
+
         foreach (AnimationClip clip in animator.runtimeAnimatorController.animationClips)
         {
             if (clip.name == clipName)
@@ -218,6 +392,97 @@ public class GameManager : MonoBehaviour
         }
         return 0.5f;
     }
+
+    #endregion
+
+    #region Collectibles
+
+    private void AssignCounterText()
+    {
+        GameObject counterObject = GameObject.Find("CollectibleCounter");
+        if (counterObject != null)
+        {
+            counterText = counterObject.GetComponent<TextMeshProUGUI>();
+        }
+        UpdateCounterUI();
+    }
+
+    private void AssignWinGameCanvas()
+    {
+        winGameCanvas = GameObject.Find("CanvasWinGame");
+        if (winGameCanvas != null)
+        {
+            winGameAnimator = winGameCanvas.GetComponent<Animator>();
+            winGameCanvas.SetActive(false);
+        }
+    }
+
+    public void ResetCollectibles()
+    {
+        collectedCount = 0;
+        UpdateCounterUI();
+        
+        if (collectiblePrefab != null)
+        {
+            SpawnCollectibles();
+        }
+    }
+
+    public void UpdateCounterUI()
+    {
+        if (counterText != null)
+        {
+            counterText.text = collectedCount.ToString();
+        }
+    }
+
+    public void SpawnCollectibles()
+    {
+        for (int i = 0; i < collectibleCount; i++)
+        {
+            Vector3 randomPosition = new Vector3(
+                Random.Range(minX, maxX),
+                yPosition,
+                Random.Range(minZ, maxZ)
+            );
+
+            GameObject collectible = Instantiate(collectiblePrefab, randomPosition, Quaternion.identity);
+            
+            var collectibleComponent = collectible.GetComponent<Collectible>();
+            if (collectibleComponent != null)
+            {
+                collectibleComponent.Initialize(collectibleAudio);
+            }
+        }
+    }
+
+    public void CollectItem()
+    {
+        collectedCount++;
+        UpdateCounterUI();
+
+        if (collectedCount >= collectibleCount)
+        {
+            Debug.Log("All collectibles collected! Player Wins!");
+            WinGame();
+        }
+    }
+
+    private void WinGame()
+    {
+        ChangeGameState(GameState.GameOver);
+        
+        if (winGameCanvas != null)
+        {
+            winGameCanvas.SetActive(true);
+            winGameAnimator?.SetTrigger("Appear");
+        }
+    }
+
+    #endregion
+
+    #region Audio
+
     public void UpdateVolume(float volume)
     {
         AudioListener.volume = volume;
@@ -226,18 +491,16 @@ public class GameManager : MonoBehaviour
         onVolumeChangeEvent?.RaiseEvent();
     }
 
-    public void LoadLevel(int levelIndex)
+    public float GetVolume()
     {
-        if (levelIndex >= 0 && levelIndex < levelScenes.Length)
-        {
-            SceneManager.LoadScene(levelScenes[levelIndex]);
-        }
-        else
-        {
-            Debug.LogError("Invalid level index!");
-        }
+        return PlayerPrefs.GetFloat("Volume", 1f);
     }
-        public void QuitGame()
+
+    #endregion
+
+    #region Application
+
+    public void QuitGame()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
@@ -245,5 +508,6 @@ public class GameManager : MonoBehaviour
         Application.Quit();
 #endif
     }
-}
 
+    #endregion
+}

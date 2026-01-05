@@ -10,6 +10,8 @@ public class MainMenuController : MonoBehaviour
     public GameObject optionsCanvas;
     public GameObject creditsCanvas;
     public GameObject quitConfirmationCanvas;
+    public GameObject levelSelectionCanvas;
+    public Animator levelSelectionAnimator;
 
     [Header("Animator Controllers")]
     public Animator mainMenuAnimator;
