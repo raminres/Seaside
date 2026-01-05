@@ -9,7 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74e82d8d1eb6fa64fbe6068e173caf4f, type: 3}
-  m_Name: GameState
-  m_EditorClassIdentifier: 
-  CurrentState: 1
+  m_Script: {fileID: 11500000, guid: fceb869fb529fd44a86e7698dfd85926, type: 3}
+  m_Name: FloatEventLoading
+  m_EditorClassIdentifier: Assembly-CSharp::FloatEventSo

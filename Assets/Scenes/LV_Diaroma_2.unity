@@ -2256,13 +2256,18 @@ MonoBehaviour:
   gameState: {fileID: 11400000, guid: 081301c3b0042b14699a035b037d6934, type: 2}
   onGameStateChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
     type: 2}
-  onVolumeChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
-    type: 2}
+  onGamePaused: {fileID: 11400000, guid: 7d02f063ca755454ebf4961c83e41382, type: 2}
+  onGameResumed: {fileID: 11400000, guid: 5a747b2ffd88b1e40a0e099f7dec2f8c, type: 2}
   mainMenuSceneName: LV_MainMenu
+  persistentGameplayScene: 
   levelScenes:
   - LV_Level1
   - LV_Level2
   - LV_Level3
+  onLoadProgress: {fileID: 11400000, guid: 17f72cd3495e86c46a4765a508e6e4b7, type: 2}
+  useAdditiveLoading: 1
+  onVolumeChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
+    type: 2}
   collectiblePrefab: {fileID: 6302578734045126089, guid: a109a05b619c32545b6aa0c71522d9ba,
     type: 3}
   collectibleCount: 20
@@ -11361,6 +11366,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: UI_Canvas_StarterAssetsInputs_Joysticks
+      objectReference: {fileID: 0}
+    - target: {fileID: 6751388636123340836, guid: 2f7f3dde7ae722a4aafffe20691ad702,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8890774966862588244, guid: 2f7f3dde7ae722a4aafffe20691ad702,
         type: 3}

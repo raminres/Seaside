@@ -68,15 +68,12 @@ public class PauseMenuController : MonoBehaviour
         isPaused = true;
 
         pauseMenuCanvas.SetActive(true);
-        Time.timeScale = 0f;
+        GameManager.Instance.ChangeGameState(GameState.Paused);
 
         if (thirdPersonController != null)
         {
             thirdPersonController.enabled = false;
         }
-
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
     }
 
     public void ResumeGame()
@@ -85,29 +82,26 @@ public class PauseMenuController : MonoBehaviour
         isPaused = false;
 
         pauseMenuCanvas.SetActive(false);
-        Time.timeScale = 1f;
+        GameManager.Instance.ChangeGameState(GameState.Playing);
 
         if (thirdPersonController != null)
         {
             thirdPersonController.enabled = true;
         }
-
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     public void QuitToMainMenu()
     {
         PlayClickSound();
-        Time.timeScale = 1f; 
-        SceneManager.LoadScene(mainMenuSceneName);
+        GameManager.Instance.ReturnToMainMenu();
     }
 
     // 🎯 **New Methods for WinGameCanvas Buttons**
     public void RestartGame()
     {
         PlayClickSound();
-        Time.timeScale = 1f; 
+        Time.timeScale = 1f;
+        GameManager.Instance.ChangeGameState(GameState.Playing);
         SceneManager.LoadScene(gameSceneName);
     }
 
@@ -115,7 +109,7 @@ public class PauseMenuController : MonoBehaviour
     {
         PlayClickSound();
         Time.timeScale = 1f;
-        SceneManager.LoadScene(mainMenuSceneName);
+        GameManager.Instance.ReturnToMainMenu();
     }
 
     public void PlayHoverSound()

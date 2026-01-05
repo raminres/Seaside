@@ -803,6 +803,7 @@ GameObject:
   - component: {fileID: 65397132}
   - component: {fileID: 65397131}
   - component: {fileID: 65397130}
+  - component: {fileID: 65397135}
   m_Layer: 5
   m_Name: ButtonLevel1
   m_TagString: Untagged
@@ -827,9 +828,9 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 1701778133}
-          m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
-          m_MethodName: PlayHoverSound
+        - m_Target: {fileID: 65397135}
+          m_TargetAssemblyTypeName: LevelSelectButton, Assembly-CSharp
+          m_MethodName: SelectThisLevel
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -895,6 +896,18 @@ MonoBehaviour:
           m_StringArgument: 0
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 65397135}
+        m_TargetAssemblyTypeName: LevelSelectButton, Assembly-CSharp
+        m_MethodName: SelectThisLevel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &65397132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -952,6 +965,19 @@ RectTransform:
   m_AnchoredPosition: {x: -244, y: -20}
   m_SizeDelta: {x: 120, y: 120}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &65397135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 65397128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a9ab7164e6725478a31577d2080993, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelSelectButton
+  levelIndex: 0
 --- !u!1 &131590806
 GameObject:
   m_ObjectHideFlags: 0
@@ -1705,6 +1731,7 @@ GameObject:
   - component: {fileID: 331803230}
   - component: {fileID: 331803229}
   - component: {fileID: 331803227}
+  - component: {fileID: 331803232}
   m_Layer: 5
   m_Name: ButtonLevel2
   m_TagString: Untagged
@@ -1816,6 +1843,18 @@ MonoBehaviour:
           m_StringArgument: 1
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 331803232}
+        m_TargetAssemblyTypeName: LevelSelectButton, Assembly-CSharp
+        m_MethodName: SelectThisLevel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &331803230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1854,6 +1893,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 331803225}
   m_CullTransparentMesh: 1
+--- !u!114 &331803232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 331803225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a9ab7164e6725478a31577d2080993, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelSelectButton
+  levelIndex: 1
 --- !u!1 &339702496
 GameObject:
   m_ObjectHideFlags: 0
@@ -1944,6 +1996,7 @@ GameObject:
   - component: {fileID: 382146864}
   - component: {fileID: 382146863}
   - component: {fileID: 382146861}
+  - component: {fileID: 382146866}
   m_Layer: 5
   m_Name: ButtonLevel3
   m_TagString: Untagged
@@ -2055,6 +2108,18 @@ MonoBehaviour:
           m_StringArgument: 2
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 382146866}
+        m_TargetAssemblyTypeName: LevelSelectButton, Assembly-CSharp
+        m_MethodName: SelectThisLevel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &382146864
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2093,6 +2158,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 382146859}
   m_CullTransparentMesh: 1
+--- !u!114 &382146866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 382146859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25a9ab7164e6725478a31577d2080993, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelSelectButton
+  levelIndex: 2
 --- !u!1 &406250768
 GameObject:
   m_ObjectHideFlags: 0
@@ -4449,13 +4527,18 @@ MonoBehaviour:
   gameState: {fileID: 11400000, guid: 081301c3b0042b14699a035b037d6934, type: 2}
   onGameStateChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
     type: 2}
-  onVolumeChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
-    type: 2}
+  onGamePaused: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198, type: 2}
+  onGameResumed: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198, type: 2}
   mainMenuSceneName: LV_MainMenu
+  persistentGameplayScene: 
   levelScenes:
   - LV_Diaroma
   - LV_Diaroma_2
   - LV_Diaroma_3
+  onLoadProgress: {fileID: 11400000, guid: 0dfb99da92136b7408c549f21905ee1a, type: 2}
+  useAdditiveLoading: 0
+  onVolumeChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
+    type: 2}
   collectiblePrefab: {fileID: 6302578734045126089, guid: a109a05b619c32545b6aa0c71522d9ba,
     type: 3}
   collectibleCount: 20
@@ -4476,7 +4559,7 @@ Transform:
   m_GameObject: {fileID: 984594948}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.290741, y: -2.5762432, z: -15.487369}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7421,6 +7504,8 @@ MonoBehaviour:
   optionsCanvas: {fileID: 1421732052}
   creditsCanvas: {fileID: 2107390727}
   quitConfirmationCanvas: {fileID: 406250768}
+  levelSelectionCanvas: {fileID: 1005164546}
+  levelSelectionAnimator: {fileID: 1005164547}
   mainMenuAnimator: {fileID: 1223013708}
   optionsAnimator: {fileID: 1421732057}
   creditsAnimator: {fileID: 2107390732}
@@ -7429,7 +7514,7 @@ MonoBehaviour:
   hoverSound: {fileID: 8300000, guid: 60eaf9b5caae1cd40a968cd4cfaa6a10, type: 3}
   clickSound: {fileID: 8300000, guid: 832a7857dd3c0024b860c3455bd6395f, type: 3}
   volumeSlider: {fileID: 1541263337}
-  gameSceneName: LV_Diaroma
+  gameSceneName: LV_Diaroma_2
 --- !u!4 &1701778134
 Transform:
   m_ObjectHideFlags: 0
