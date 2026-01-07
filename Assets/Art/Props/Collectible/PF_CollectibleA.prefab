@@ -61,6 +61,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -82,9 +84,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &6302578734045126089
 GameObject:
@@ -151,10 +155,44 @@ MonoBehaviour:
   m_GameObject: {fileID: 6302578734045126089}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35367814d427ffb479af7463bf51c13c, type: 3}
+  m_Script: {fileID: 11500000, guid: 3aeab2a2a531f5a49a4c5736b745099a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collectSound: {fileID: 8300000, guid: 3cbf313abf93fa449b2eaf5f0ec29287, type: 3}
+  _interactionPrompt: Interact
+  _interactionType: 0
+  _holdDuration: 1
+  _canInteract: 1
+  _highlightObject: {fileID: 0}
+  _outlineRenderer: {fileID: 0}
+  _outlinePropertyName: _OutlineWidth
+  _outlineWidth: 0.02
+  _audioSource: {fileID: 0}
+  _interactSound: {fileID: 0}
+  _onInteract:
+    m_PersistentCalls:
+      m_Calls: []
+  _onFocused:
+    m_PersistentCalls:
+      m_Calls: []
+  _onUnfocused:
+    m_PersistentCalls:
+      m_Calls: []
+  _collectibleId: 
+  _value: 1
+  _useGameManagerCounter: 1
+  _animator: {fileID: 9171113944411679286}
+  _collectTrigger: Collect
+  _bobUpDown: 1
+  _bobSpeed: 2
+  _bobHeight: 0.1
+  _rotate: 1
+  _rotateSpeed: 90
+  _collectSound: {fileID: 8300000, guid: 3cbf313abf93fa449b2eaf5f0ec29287, type: 3}
+  _onCollectedEvent: {fileID: 0}
+  _onItemCollectedEvent: {fileID: 0}
+  _onCollected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!95 &9171113944411679286
 Animator:
   serializedVersion: 7

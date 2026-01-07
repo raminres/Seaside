@@ -64,7 +64,7 @@
                     "name": "ChangeColor",
                     "type": "Button",
                     "id": "5452ed7a-a061-4af8-bf33-0bc1dfcf5ddc",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
@@ -283,6 +283,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "KeyboardMouse",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d1a7df81-a281-405a-b191-d118028b42b5",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad;Xbox Controller",
                     "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
