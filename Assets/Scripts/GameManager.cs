@@ -87,20 +87,30 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
+    private void ClearMainMenuReferences()
+    {
+        levelSelectionCanvas = null;
+        levelSelectionAnimator = null;
+    }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        // Reassign main menu UI references when returning to main menu
         if (scene.name == mainMenuSceneName)
         {
             AssignLevelSelectionUI();
             ChangeGameState(GameState.MainMenu);
         }
-        else if (scene.name != persistentGameplayScene)
+        else
         {
-            AssignCounterText();
-            AssignWinGameCanvas();
-            ResetCollectibles();
+            // Clear main menu references when entering any other scene
+            ClearMainMenuReferences();
+        
+            if (scene.name != persistentGameplayScene)
+            {
+                AssignCounterText();
+                AssignWinGameCanvas();
+                ResetCollectibles();
+            }
         }
     }
     private void AssignLevelSelectionUI()
@@ -111,6 +121,11 @@ public class GameManager : MonoBehaviour
         {
             levelSelectionCanvas = mainMenu.levelSelectionCanvas;
             levelSelectionAnimator = mainMenu.levelSelectionAnimator;
+        }
+        else
+        {
+            levelSelectionCanvas = null;
+            levelSelectionAnimator = null;
         }
     }
 
@@ -344,11 +359,10 @@ public class GameManager : MonoBehaviour
 
     public void ShowLevelSelection()
     {
-        if (levelSelectionCanvas != null)
-        {
-            levelSelectionCanvas.SetActive(true);
-            levelSelectionAnimator?.SetTrigger("Appear");
-        }
+        if (levelSelectionCanvas == null) return;
+    
+        levelSelectionCanvas.SetActive(true);
+        levelSelectionAnimator?.SetTrigger("Appear");
     }
 
     public void HideLevelSelection()
@@ -376,7 +390,12 @@ public class GameManager : MonoBehaviour
     {
         float animationLength = GetAnimationClipLength(animator, animationName);
         yield return new WaitForSeconds(animationLength);
-        canvas.SetActive(false);
+    
+        // Check if canvas still exists before accessing it
+        if (canvas != null)
+        {
+            canvas.SetActive(false);
+        }
     }
 
     private float GetAnimationClipLength(Animator animator, string clipName)
@@ -447,8 +466,8 @@ public class GameManager : MonoBehaviour
             );
 
             GameObject collectible = Instantiate(collectiblePrefab, randomPosition, Quaternion.identity);
-            
-            var collectibleComponent = collectible.GetComponent<Collectible>();
+        
+            var collectibleComponent = collectible.GetComponent<CollectibleItem>();  // Changed from Collectible
             if (collectibleComponent != null)
             {
                 collectibleComponent.Initialize(collectibleAudio);
