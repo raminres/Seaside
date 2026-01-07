@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 /// <summary>
 /// Collectible item that requires interaction (press E) to pick up.
-/// Works with GameManager.CollectItem() and supports animation/sound.
+/// Plays grab animation on player.
 /// </summary>
 public class CollectibleItem : InteractableBase
 {
@@ -12,6 +12,9 @@ public class CollectibleItem : InteractableBase
     [SerializeField] private string _collectibleId;
     [SerializeField] private int _value = 1;
     [SerializeField] private bool _useGameManagerCounter = true;
+
+    [Header("Player Animation")]
+    [SerializeField] private bool _playPlayerAnimation = true;
 
     [Header("Animation")]
     [SerializeField] private Animator _animator;
@@ -44,7 +47,6 @@ public class CollectibleItem : InteractableBase
             _animator = GetComponent<Animator>();
         }
 
-        // Setup audio source
         _audioSource = GetComponent<AudioSource>();
         if (_audioSource == null && _collectSound != null)
         {
@@ -53,13 +55,10 @@ public class CollectibleItem : InteractableBase
         }
     }
 
-    /// <summary>
-    /// Initialize method for compatibility with GameManager.SpawnCollectibles()
-    /// </summary>
     public void Initialize(AudioClip clip)
     {
         _collectSound = clip;
-        
+
         if (_audioSource == null)
         {
             _audioSource = GetComponent<AudioSource>();
@@ -68,7 +67,7 @@ public class CollectibleItem : InteractableBase
                 _audioSource = gameObject.AddComponent<AudioSource>();
             }
         }
-        
+
         _audioSource.clip = clip;
         _audioSource.playOnAwake = false;
     }
@@ -94,14 +93,26 @@ public class CollectibleItem : InteractableBase
     protected override void OnInteractInternal(PlayerController player)
     {
         if (_isCollected) return;
-        Collect();
+
+        if (_playPlayerAnimation && player != null)
+        {
+            // Play grab animation, then collect
+            player.PlayGrabInteraction(transform, () =>
+            {
+                Collect();
+            });
+        }
+        else
+        {
+            Collect();
+        }
     }
 
     private void Collect()
     {
         _isCollected = true;
 
-        // Notify GameManager (existing behavior)
+        // Notify GameManager
         if (_useGameManagerCounter && GameManager.Instance != null)
         {
             GameManager.Instance.CollectItem();
@@ -109,7 +120,7 @@ public class CollectibleItem : InteractableBase
 
         // Fire events
         _onCollectedEvent?.RaiseEvent(_value);
-        
+
         if (!string.IsNullOrEmpty(_collectibleId))
         {
             _onItemCollectedEvent?.RaiseEvent(_collectibleId);
@@ -117,7 +128,7 @@ public class CollectibleItem : InteractableBase
 
         _onCollected?.Invoke();
 
-        // Play animation
+        // Play collectible animation
         if (_animator != null)
         {
             _animator.SetTrigger(_collectTrigger);
@@ -131,7 +142,6 @@ public class CollectibleItem : InteractableBase
         }
         else
         {
-            // No sound, destroy after short delay for animation
             StartCoroutine(WaitAndDestroy(0.25f));
         }
     }
@@ -142,7 +152,6 @@ public class CollectibleItem : InteractableBase
         Destroy(gameObject);
     }
 
-    // Disable highlight/outline when collected
     public override void OnFocused()
     {
         if (_isCollected) return;

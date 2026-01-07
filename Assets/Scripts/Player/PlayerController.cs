@@ -27,6 +27,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _gravity = -15f;
     [SerializeField] private float _jumpTimeout = 0.5f;
     [SerializeField] private float _fallTimeout = 0.15f;
+    [SerializeField] private float _hardLandingVelocity = -10f;
 
     [Header("Ground Check")]
     [SerializeField] private float _groundedOffset = -0.14f;
@@ -44,9 +45,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _bottomClamp = -30f;
     [SerializeField] private float _cameraRotationSpeed = 1f;
 
-    [Header("Events")]
-    [SerializeField] private GameEventSo _onJump;
-    [SerializeField] private GameEventSo _onLand;
+    [Header("Audio")]
+    [SerializeField] private PlayerAudio _playerAudio;
+
+    [Header("Animation")]
+    [SerializeField] private PlayerAnimation _playerAnimation;
 
     // State
     public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
@@ -70,6 +73,7 @@ public class PlayerController : MonoBehaviour
     private float _rotationVelocity;
     private float _verticalVelocity;
     private float _terminalVelocity = -53f;
+    private float _lastVerticalVelocity;
 
     // Timers
     private float _jumpTimeoutDelta;
@@ -80,11 +84,19 @@ public class PlayerController : MonoBehaviour
     private float _cinemachineTargetPitch;
     private const float Threshold = 0.01f;
 
+    // Swimming state
+    private bool _wasSwimming;
+
     private void Awake()
     {
         _controller = GetComponent<CharacterController>();
         _playerInput = GetComponent<PlayerInput>();
         _mainCamera = Camera.main;
+
+        if (_mainCamera == null)
+        {
+            _mainCamera = FindFirstObjectByType<Camera>();
+        }
 
         _jumpTimeoutDelta = _jumpTimeout;
         _fallTimeoutDelta = _fallTimeout;
@@ -93,6 +105,16 @@ public class PlayerController : MonoBehaviour
         {
             _cinemachineTargetYaw = _cameraTarget.rotation.eulerAngles.y;
         }
+
+        if (_playerAudio == null)
+        {
+            _playerAudio = GetComponentInChildren<PlayerAudio>();
+        }
+
+        if (_playerAnimation == null)
+        {
+            _playerAnimation = GetComponentInChildren<PlayerAnimation>();
+        }
     }
 
     private void Update()
@@ -100,7 +122,31 @@ public class PlayerController : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsPaused)
             return;
 
+        // Always do ground check
         GroundCheck();
+
+        // Check if playing interaction animation
+        bool isInteracting = (_playerAnimation != null && _playerAnimation.IsPlayingInteractionAnimation) 
+                             || CurrentState == PlayerState.Interacting;
+
+        if (isInteracting)
+        {
+            // Still apply gravity so player doesn't float
+            if (!IsGrounded)
+            {
+                _verticalVelocity += _gravity * Time.deltaTime;
+                _controller.Move(new Vector3(0f, _verticalVelocity, 0f) * Time.deltaTime);
+            }
+            else
+            {
+                _verticalVelocity = -2f;
+            }
+            return;
+        }
+
+        // Store velocity for landing detection
+        _lastVerticalVelocity = _verticalVelocity;
+
         UpdateState();
 
         switch (CurrentState)
@@ -120,6 +166,7 @@ public class PlayerController : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsPaused)
             return;
 
+        // Camera always works, even during interactions
         HandleCameraRotation();
     }
 
@@ -186,8 +233,16 @@ public class PlayerController : MonoBehaviour
             case PlayerState.Falling:
                 if (newState != PlayerState.Jumping && newState != PlayerState.Swimming)
                 {
-                    _onLand?.RaiseEvent();
+                    // Determine if hard landing
+                    bool hardLanding = _lastVerticalVelocity < _hardLandingVelocity;
+                    _playerAudio?.PlayLandSound(hardLanding);
                 }
+                break;
+
+            case PlayerState.Swimming:
+                if (!_wasSwimming) break;
+                _playerAudio?.PlayExitWaterSound();
+                _wasSwimming = false;
                 break;
         }
 
@@ -195,7 +250,15 @@ public class PlayerController : MonoBehaviour
         switch (newState)
         {
             case PlayerState.Jumping:
-                _onJump?.RaiseEvent();
+                _playerAudio?.PlayJumpSound();
+                break;
+
+            case PlayerState.Swimming:
+                if (!_wasSwimming)
+                {
+                    _playerAudio?.PlayEnterWaterSound();
+                    _wasSwimming = true;
+                }
                 break;
         }
     }
@@ -262,7 +325,7 @@ public class PlayerController : MonoBehaviour
     private void HandleSwimming()
     {
         Vector3 inputDirection = new Vector3(_moveInput.x, 0f, _moveInput.y).normalized;
-        
+
         if (inputDirection != Vector3.zero)
         {
             _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
@@ -273,7 +336,7 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector3 moveDirection = Quaternion.Euler(0f, _targetRotation, 0f) * Vector3.forward;
-        
+
         float targetY = _waterSurfaceY - 0.5f;
         float verticalMove = (targetY - transform.position.y) * 2f;
 
@@ -362,6 +425,74 @@ public class PlayerController : MonoBehaviour
         if (angle < -360f) angle += 360f;
         if (angle > 360f) angle -= 360f;
         return Mathf.Clamp(angle, min, max);
+    }
+
+    #endregion
+
+    #region Interaction
+
+    /// <summary>
+    /// Play grab animation and optionally rotate toward target.
+    /// </summary>
+    public void PlayGrabInteraction(Transform target = null, System.Action onComplete = null)
+    {
+        if (target != null)
+        {
+            RotateToward(target.position);
+        }
+
+        SetInteracting(true);
+        _playerAnimation?.PlayGrabAnimation(() =>
+        {
+            SetInteracting(false);
+            onComplete?.Invoke();
+        });
+    }
+
+    /// <summary>
+    /// Play fire lighting animation.
+    /// </summary>
+    public void PlayLightFireInteraction(Transform target = null, System.Action onComplete = null)
+    {
+        if (target != null)
+        {
+            RotateToward(target.position);
+        }
+
+        SetInteracting(true);
+        _playerAnimation?.PlayLightFireAnimation(() =>
+        {
+            SetInteracting(false);
+            onComplete?.Invoke();
+        });
+    }
+
+    /// <summary>
+    /// Play generic interaction animation.
+    /// </summary>
+    public void PlayInteraction(Transform target = null, System.Action onComplete = null)
+    {
+        if (target != null)
+        {
+            RotateToward(target.position);
+        }
+
+        SetInteracting(true);
+        _playerAnimation?.PlayInteractAnimation(() =>
+        {
+            SetInteracting(false);
+            onComplete?.Invoke();
+        });
+    }
+
+    private void RotateToward(Vector3 position)
+    {
+        Vector3 direction = (position - transform.position).normalized;
+        direction.y = 0;
+        if (direction != Vector3.zero)
+        {
+            transform.rotation = Quaternion.LookRotation(direction);
+        }
     }
 
     #endregion
