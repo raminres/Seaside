@@ -3,6 +3,7 @@ using UnityEngine.Events;
 
 /// <summary>
 /// Fire pit, torch, or campfire that can be lit by the player.
+/// Plays fire lighting animation on player.
 /// </summary>
 public class FireStarter : InteractableBase
 {
@@ -12,6 +13,9 @@ public class FireStarter : InteractableBase
     [SerializeField] private float _lightIntensity = 2f;
     [SerializeField] private bool _requiresItem = true;
     [SerializeField] private string _requiredItemId = "Matches";
+
+    [Header("Player Animation")]
+    [SerializeField] private bool _playPlayerAnimation = true;
 
     [Header("Light Flicker")]
     [SerializeField] private bool _flickerLight = true;
@@ -29,8 +33,8 @@ public class FireStarter : InteractableBase
 
     private bool _isLit;
     private float _baseIntensity;
+    private PlayerController _interactingPlayer;
 
-    // Simple inventory check - replace with your inventory system
     public static bool HasMatches { get; set; } = false;
 
     public bool IsLit => _isLit;
@@ -63,7 +67,21 @@ public class FireStarter : InteractableBase
     protected override void OnInteractInternal(PlayerController player)
     {
         if (_isLit) return;
-        LightFire();
+
+        _interactingPlayer = player;
+
+        if (_playPlayerAnimation && player != null)
+        {
+            // Play fire lighting animation, then light fire
+            player.PlayLightFireInteraction(transform, () =>
+            {
+                LightFire();
+            });
+        }
+        else
+        {
+            LightFire();
+        }
     }
 
     private void Update()

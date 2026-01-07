@@ -4,6 +4,7 @@ using UnityEngine.Events;
 /// <summary>
 /// Door that can be opened and closed via interaction.
 /// Door always opens away from the player.
+/// Plays grab animation on player.
 /// </summary>
 public class Door : InteractableBase
 {
@@ -13,12 +14,14 @@ public class Door : InteractableBase
     [SerializeField] private float _openSpeed = 5f;
     [SerializeField] private bool _autoClose = true;
     [SerializeField] private float _autoCloseDelay = 3f;
-    [SerializeField] private bool _invertOpenDirection = false;
 
     [Header("Animation (Optional)")]
     [SerializeField] private Animator _doorAnimator;
     [SerializeField] private string _doorOpenBool = "DoorOpen";
     [SerializeField] private bool _useAnimator = false;
+
+    [Header("Player Animation")]
+    [SerializeField] private bool _playPlayerAnimation = true;
 
     [Header("Door Audio")]
     [SerializeField] private AudioClip _openSound;
@@ -37,20 +40,19 @@ public class Door : InteractableBase
     private float _targetAngle;
     private float _autoCloseTimer;
     private Quaternion _closedRotation;
-    private int _openDirection = 1; // 1 or -1 based on player position
+    private int _openDirection = 1;
 
     public bool IsOpen => _isOpen;
 
     private void Awake()
     {
         _interactionType = InteractionType.Toggle;
-        
+
         if (_doorPivot != null)
         {
             _closedRotation = _doorPivot.localRotation;
         }
 
-        // Setup audio source if not assigned
         if (_audioSource == null)
         {
             _audioSource = GetComponent<AudioSource>();
@@ -58,7 +60,7 @@ public class Door : InteractableBase
             {
                 _audioSource = gameObject.AddComponent<AudioSource>();
                 _audioSource.playOnAwake = false;
-                _audioSource.spatialBlend = 1f; // 3D sound
+                _audioSource.spatialBlend = 1f;
             }
         }
     }
@@ -67,15 +69,30 @@ public class Door : InteractableBase
 
     protected override void OnInteractInternal(PlayerController player)
     {
-        Debug.Log("Door interaction triggered!");  // Add this line
-    
+        DetermineOpenDirection(player.transform);
+
+        if (_playPlayerAnimation && player != null)
+        {
+            // Play grab animation, then toggle door
+            player.PlayGrabInteraction(transform, () =>
+            {
+                ToggleDoor();
+            });
+        }
+        else
+        {
+            ToggleDoor();
+        }
+    }
+
+    private void ToggleDoor()
+    {
         if (_isOpen)
         {
             Close();
         }
         else
         {
-            DetermineOpenDirection(player.transform);
             Open();
         }
     }
@@ -84,18 +101,11 @@ public class Door : InteractableBase
     {
         if (_doorPivot == null) return;
 
-        // Get door's forward direction
         Vector3 doorForward = _doorPivot.forward;
-        
-        // Get direction from door to player
         Vector3 toPlayer = (playerTransform.position - _doorPivot.position).normalized;
-        
-        // Dot product tells us which side of the door the player is on
         float dot = Vector3.Dot(doorForward, toPlayer);
-        
-        // Open away from player
-        _openDirection = dot > 0 ? -1 : 1;
-        if (_invertOpenDirection) _openDirection *= -1;
+
+        _openDirection = dot > 0 ? 1 : -1;
     }
 
     private void Update()
@@ -131,7 +141,7 @@ public class Door : InteractableBase
     public void Open()
     {
         if (_isOpen) return;
-        
+
         _isOpen = true;
         _autoCloseTimer = _autoCloseDelay;
 
@@ -155,7 +165,7 @@ public class Door : InteractableBase
     public void Close()
     {
         if (!_isOpen) return;
-        
+
         _isOpen = false;
 
         if (_useAnimator && _doorAnimator != null)
@@ -177,19 +187,10 @@ public class Door : InteractableBase
 
     public void Toggle()
     {
-        if (_isOpen)
-        {
-            Close();
-        }
-        else
-        {
-            Open();
-        }
+        if (_isOpen) Close();
+        else Open();
     }
 
-    /// <summary>
-    /// Call this when player exits the door area (optional auto-close trigger).
-    /// </summary>
     public void OnPlayerExitArea()
     {
         if (_autoClose && _isOpen)
