@@ -9,7 +9,7 @@ public class PlayerAnimation : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private PlayerController _playerController;
-    [SerializeField] private PlayerAudio _playerAudio;
+    [SerializeField] private PlayerAudioAndVfx _playerAudio;
 
     [Header("Animation Smoothing")]
     [SerializeField] private float _animationBlendSpeed = 10f;
@@ -52,10 +52,10 @@ public class PlayerAnimation : MonoBehaviour
 
         if (_playerAudio == null)
         {
-            _playerAudio = GetComponent<PlayerAudio>();
+            _playerAudio = GetComponent<PlayerAudioAndVfx>();
             if (_playerAudio == null)
             {
-                _playerAudio = GetComponentInParent<PlayerAudio>();
+                _playerAudio = GetComponentInParent<PlayerAudioAndVfx>();
             }
         }
     }

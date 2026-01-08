@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _cameraRotationSpeed = 1f;
 
     [Header("Audio")]
-    [SerializeField] private PlayerAudio _playerAudio;
+    [SerializeField] private PlayerAudioAndVfx _playerAudio;
 
     [Header("Animation")]
     [SerializeField] private PlayerAnimation _playerAnimation;
@@ -108,7 +108,7 @@ public class PlayerController : MonoBehaviour
 
         if (_playerAudio == null)
         {
-            _playerAudio = GetComponentInChildren<PlayerAudio>();
+            _playerAudio = GetComponentInChildren<PlayerAudioAndVfx>();
         }
 
         if (_playerAnimation == null)
