@@ -15,6 +15,9 @@ public class PlayerInteraction : MonoBehaviour
     [Header("UI Reference (Optional)")]
     [SerializeField] private InteractionPromptUI _interactionPromptUI;
 
+    [Header("Mobile Input (Optional)")]
+    [SerializeField] private MobileInputHandler _mobileInputHandler;
+
     [Header("Debug")]
     [SerializeField] private bool _debugLog = false;
 
@@ -24,6 +27,7 @@ public class PlayerInteraction : MonoBehaviour
     
     private bool _isHolding;
     private float _holdTimer;
+    private bool _wasInteractPressed;
 
     public IInteractable CurrentInteractable => _currentInteractable;
     public bool HasInteractable => _currentInteractable != null && _currentInteractable.CanInteract;
@@ -45,6 +49,12 @@ public class PlayerInteraction : MonoBehaviour
         {
             _interactionPromptUI = FindFirstObjectByType<InteractionPromptUI>();
         }
+
+        // Auto-find mobile input handler
+        if (_mobileInputHandler == null)
+        {
+            _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+        }
     }
 
     private void Update()
@@ -53,7 +63,62 @@ public class PlayerInteraction : MonoBehaviour
             return;
 
         UpdateBestInteractable();
+        ProcessMobileInteract();
         HandleHoldInteraction();
+    }
+
+    private void ProcessMobileInteract()
+    {
+        if (_mobileInputHandler == null) return;
+
+        bool isPressed = _mobileInputHandler.InteractInput;
+
+        // Detect press/release for mobile
+        if (isPressed && !_wasInteractPressed)
+        {
+            // Just pressed
+            OnInteractPressed();
+        }
+        else if (!isPressed && _wasInteractPressed)
+        {
+            // Just released
+            OnInteractReleased();
+        }
+
+        _wasInteractPressed = isPressed;
+    }
+
+    private void OnInteractPressed()
+    {
+        if (_currentInteractable == null || !_currentInteractable.CanInteract)
+            return;
+
+        switch (_currentInteractable.InteractionType)
+        {
+            case InteractionType.Instant:
+            case InteractionType.Toggle:
+                CompleteInteraction();
+                break;
+
+            case InteractionType.Hold:
+                _isHolding = true;
+                _holdTimer = 0f;
+                break;
+        }
+    }
+
+    private void OnInteractReleased()
+    {
+        if (_currentInteractable != null && _currentInteractable.InteractionType == InteractionType.Hold)
+        {
+            _isHolding = false;
+            _holdTimer = 0f;
+            
+            if (_interactionPromptUI != null)
+            {
+                _interactionPromptUI.SetHoldProgress(0f);
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
