@@ -828,9 +828,9 @@ MonoBehaviour:
     callback:
       m_PersistentCalls:
         m_Calls:
-        - m_Target: {fileID: 65397135}
-          m_TargetAssemblyTypeName: LevelSelectButton, Assembly-CSharp
-          m_MethodName: SelectThisLevel
+        - m_Target: {fileID: 1701778133}
+          m_TargetAssemblyTypeName: MainMenuController, Assembly-CSharp
+          m_MethodName: PlayHoverSound
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -1838,7 +1838,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 1
+          m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 1
           m_BoolArgument: 0
@@ -2103,7 +2103,7 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 2
+          m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 2
           m_BoolArgument: 0
@@ -4530,11 +4530,9 @@ MonoBehaviour:
   onGamePaused: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198, type: 2}
   onGameResumed: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198, type: 2}
   mainMenuSceneName: LV_MainMenu
-  persistentGameplayScene: 
+  persistentGameplayScene: LV_TestScene
   levelScenes:
-  - LV_Diaroma
-  - LV_Diaroma_2
-  - LV_Diaroma_3
+  - LV_TestScene
   onLoadProgress: {fileID: 11400000, guid: 0dfb99da92136b7408c549f21905ee1a, type: 2}
   useAdditiveLoading: 0
   onVolumeChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198,
@@ -7514,7 +7512,7 @@ MonoBehaviour:
   hoverSound: {fileID: 8300000, guid: 60eaf9b5caae1cd40a968cd4cfaa6a10, type: 3}
   clickSound: {fileID: 8300000, guid: 832a7857dd3c0024b860c3455bd6395f, type: 3}
   volumeSlider: {fileID: 1541263337}
-  gameSceneName: LV_Diaroma_2
+  gameSceneName: LV_TestScene
 --- !u!4 &1701778134
 Transform:
   m_ObjectHideFlags: 0

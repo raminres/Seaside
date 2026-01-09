@@ -51,6 +51,9 @@ public class PlayerController : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private PlayerAnimation _playerAnimation;
 
+    [Header("Mobile Input (Optional)")]
+    [SerializeField] private MobileInputHandler _mobileInputHandler;
+
     // State
     public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
     public bool IsGrounded { get; private set; }
@@ -117,10 +120,31 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // Initialize cursor state based on platform
+        #if UNITY_IOS || UNITY_ANDROID
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        #else
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        #endif
+
+        // Ensure input is active
+        if (_playerInput != null)
+        {
+            _playerInput.ActivateInput();
+        }
+    }
+
     private void Update()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsPaused)
             return;
+
+        // Process mobile input if available
+        ProcessMobileInput();
 
         // Always do ground check
         GroundCheck();
@@ -517,6 +541,72 @@ public class PlayerController : MonoBehaviour
     public void OnJump(InputValue value)
     {
         _jumpInput = value.isPressed;
+    }
+
+    #endregion
+
+    #region Mobile Input
+
+    private void ProcessMobileInput()
+    {
+        if (_mobileInputHandler == null) return;
+
+        // Mobile move input - only override if mobile joystick is being used
+        if (_mobileInputHandler.HasMoveInput)
+        {
+            _moveInput = _mobileInputHandler.MoveInput;
+        }
+
+        // Mobile look input - only override if mobile joystick is being used
+        if (_mobileInputHandler.HasLookInput)
+        {
+            _lookInput = _mobileInputHandler.LookInput;
+        }
+
+        // Sprint from mobile
+        if (_mobileInputHandler.SprintInput)
+        {
+            _sprintInput = true;
+        }
+
+        // Jump from mobile
+        if (_mobileInputHandler.JumpInput)
+        {
+            _jumpInput = true;
+            _mobileInputHandler.ConsumeJump();
+        }
+    }
+
+    /// <summary>
+    /// Set move input directly (for mobile joystick).
+    /// </summary>
+    public void SetMoveInput(Vector2 input)
+    {
+        _moveInput = input;
+    }
+
+    /// <summary>
+    /// Set look input directly (for mobile joystick).
+    /// </summary>
+    public void SetLookInput(Vector2 input)
+    {
+        _lookInput = input;
+    }
+
+    /// <summary>
+    /// Set sprint state directly (for mobile button).
+    /// </summary>
+    public void SetSprint(bool isSprinting)
+    {
+        _sprintInput = isSprinting;
+    }
+
+    /// <summary>
+    /// Trigger jump (for mobile button).
+    /// </summary>
+    public void TriggerJump()
+    {
+        _jumpInput = true;
     }
 
     #endregion

@@ -1,0 +1,337 @@
+fileFormatVersion: 2
+guid: e05a720eb5bd79e438999da297c87576
+ModelImporter:
+  serializedVersion: 19301
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasCrackA
+    second: {fileID: 2100000, guid: be052c8f3e137874c984b1ceaf5a0ce0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasDamageWallA
+    second: {fileID: 2100000, guid: c6c89f866d054cc4eacc53b41dc3875a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasDamageWallB
+    second: {fileID: 2100000, guid: 637f4abdbcea3c84ba08f551f2d705de, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasFish
+    second: {fileID: 2100000, guid: 9ee651443307ebd40810230de99e4991, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasLeakes
+    second: {fileID: 2100000, guid: 0529899ff35f892489b61d6f9847ef31, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasLeakesB
+    second: {fileID: 2100000, guid: 15ba92bd6481f894eb95120ab502c48d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasMoss
+    second: {fileID: 2100000, guid: 049bd48186c933542ae93b08555f33bc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasSigns
+    second: {fileID: 2100000, guid: ce902aee0c1122d47b8efa871b7638d7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_AtlasSpanishMoss
+    second: {fileID: 2100000, guid: ba9e1d0d4ba2c2740880e9fd23b3a006, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_BarkA
+    second: {fileID: 2100000, guid: 91502b827d07dd348adac0c696c29fc3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_BrickOrangeDirtA
+    second: {fileID: 2100000, guid: de668f0a115f42f4fa04180a82998deb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_BurlapWet
+    second: {fileID: 2100000, guid: 672ad3a9db059b4448a39a3c7e09b001, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_ConcreteBrightGrayTrimA
+    second: {fileID: 2100000, guid: 1e06527ae4c1cdb40a1b71204ff2b2d5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_ConcreteBrightGrayTrimB
+    second: {fileID: 2100000, guid: 71da0ca7a114778408c062f50cbfac29, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_DirtAtlasA
+    second: {fileID: 2100000, guid: 826656a99c03ebc4d86a0690d26e80e8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_ElectricPoleTrim
+    second: {fileID: 2100000, guid: 488b39a20fe8344409be29644e4d0f25, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_FishingNet
+    second: {fileID: 2100000, guid: 2b49949dfd9480a4283b0ab5fc6aa3c6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_GlassDirtyA
+    second: {fileID: 2100000, guid: 363cbb4d4f4b56b40a8875f7a10ef077, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_LeafAtlas
+    second: {fileID: 2100000, guid: bd04e4c87ed53be4694419192ee620e4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_MetalTrimA
+    second: {fileID: 2100000, guid: 1d8b2ebea2871f44ba0e4543270d7d65, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_MetalTrimRoofA
+    second: {fileID: 2100000, guid: 58a496f3cf5d332439af128387365c81, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_PlasterInterior
+    second: {fileID: 2100000, guid: 6727e4b3f233f444fa130b99d08497f7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_PlasterOldA
+    second: {fileID: 2100000, guid: 222ab1a0923a6374d8987eba0bb84236, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_PlasterOldB
+    second: {fileID: 2100000, guid: 572190938d62c6e4487b75ab0cc9469d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_PlasticOrange
+    second: {fileID: 2100000, guid: fb0f176e66ca0474a900f6823353e30a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_PlyWoodWornA
+    second: {fileID: 2100000, guid: 8c607194d7ed2194998d86870e62ba02, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_SlateRoof
+    second: {fileID: 2100000, guid: 7fd10b194ec125c4eaf622b7b277ab45, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_SoilGravel
+    second: {fileID: 2100000, guid: 954e128b49b5afe478f80169ef4c2f1d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_TrimCrane
+    second: {fileID: 2100000, guid: 09f7fb73a8d2f0246ba88427ccb1ebfc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_TrimDoorsWoodA
+    second: {fileID: 2100000, guid: 317ab69610424d74189bababcd67b89b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_TrimDoorsWoodB
+    second: {fileID: 2100000, guid: 8d7a03c2959f00e4ead6d2a9db5fc637, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueAnchor
+    second: {fileID: 2100000, guid: b83577ae94509d845811fa9c5ef91424, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueBarrels
+    second: {fileID: 2100000, guid: 30d702704bf29a84382eeb0d823107d4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueBoatC
+    second: {fileID: 2100000, guid: 9e82618bae45e2546a43f5c321c55473, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueBooks
+    second: {fileID: 2100000, guid: 3b35458574064f042a1c567b82ad703e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueBottlesA
+    second: {fileID: 2100000, guid: c02a641ddc65186468cdf78fd312422a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueCrates
+    second: {fileID: 2100000, guid: f8344aef20bd9214ba031a88183227ec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueLamps
+    second: {fileID: 2100000, guid: 1b24d35d86855f5418b2f46d481013a6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_UniqueWarningSigns
+    second: {fileID: 2100000, guid: 9587747d7fe643242a51937eacf6b41b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodBarrelsTrim
+    second: {fileID: 2100000, guid: 0493a43894de07f4fb9703ea39b2f9f5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodBrownTrimA
+    second: {fileID: 2100000, guid: a930fe1765f7ba241be9cffc79818466, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodBrownTrimC
+    second: {fileID: 2100000, guid: 2f076e2721ab68f4898ddbc8c9bd4fed, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodBrownTrimD
+    second: {fileID: 2100000, guid: 0eb567a4aca50f348a4c009fc6cffcca, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodBrownTrimE
+    second: {fileID: 2100000, guid: ff3b6762aee0ec648aa0e7faecac5897, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodBrownTrimF
+    second: {fileID: 2100000, guid: 3ea47b6dfba89594484283646e68d947, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodFloorDamaged
+    second: {fileID: 2100000, guid: f4486eb1e31567f47a0396384a55deb6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodHeartwoodAtlas
+    second: {fileID: 2100000, guid: 09709e755a0d8d1419b2c14204100d4e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_LVC_WoodLogs
+    second: {fileID: 2100000, guid: 53ca2f3fcdc85aa41a1723b19361f31c, type: 2}
+  materials:
+    materialImportMode: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 1
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
