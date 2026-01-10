@@ -1,57 +1,97 @@
-# Seaside - Unity Project
-This is a personal Unity project that features a seaside scene with a basic third-person character controller, various interactive elements, and custom shaders. The project integrates models and textures generated from Blender using geometry nodes and employs various animations to enhance the experience.
+# Seaside - Unity Technical Art Showcase
+
+A seaside exploration game built in Unity, designed to showcase Technical Artist skills through custom shaders, VFX, and environmental systems. The focus is on clean, readable code that supports stunning visual work.
+
+## Project Overview
+
+You arrive by boat at an abandoned seaside village at dusk. A distant lighthouse—the only light on the horizon—beckons you. Your journey across the village and bay to reach and activate the lighthouse reveals traces of the people who once lived here.
 
 ## Features
-1. Third-Person Character Controller
-  - The character is controlled using Unity's new Input System.
-  - Basic movement (walking/running) and camera control are integrated using Unity's own Starter Assets.
-  - Interaction with objects such as doors and sitting is implemented.
-  - Imported animations for walking, sitting, and interacting with the environment.
-  - Remote Addressable Loading. The Boat prefab is an asset that is being loaded from Firebase database. The remote loading is handled by a script. The addressable is built locally and uploaded to firebase.
-2. Interactive Elements
-  - Door Interaction: Doors can be opened and closed using keyboard interaction (E key). When the character exits the trigger zone, the door automatically closes.
-  - Sitting Interaction: The character can sit on specific objects. If the player attempts to sit in an invalid area, a UI prompt will notify them.
-  - Change the color of the Sofa: The color of the sofa can be changed with pressing the C key on the keyboard. When you are near the sofa try it.
-  - Change the Texture of the Carpet: The texture of the carpet could be toggled with T key.
-3. Seaside Environment
-  - Custom water shader created using Unity's Shader Graph for dynamic and stylized water effects.
-  - Sand, rocks, and other seaside elements to create a stylized environment.
-  - Falling leaves, fire and dust VFX to enhance the feeling of the environment.
-4. House Models
-  - House models with textures and materials used to add variety.
-  - Models are created in Blender using geometry nodes and imported as .fbx files into Unity.
-5. Animations
-  - Character animations for walking, sitting, interacting with doors, and other actions are imported and integrated with Unity's Animator.
 
-# Installation & Setup
-Requirements
-Unity: This project is built using Unity 2021.3 or higher.
-Blender (Optional): Models are generated using Blender Geometry Nodes, although Blender is not required to run the project.
-TextMesh Pro: Ensure you have TextMesh Pro installed via the Unity Package Manager for UI-related functionality.
-Steps to Run the Project:
-## Clone the repository:
-```git clone https://github.com/RasulzadeRamin/Seaside.git```
+### Player System
+- **Third-Person Controller** — State-based movement (Idle, Walking, Running, Jumping, Swimming, Interacting)
+- **New Input System** — Full support for Keyboard/Mouse, Gamepad, and Touch controls
+- **Interaction System** — Interface-based (`IInteractable`) with UnityEvents for Inspector-driven workflows
+- **Cinemachine Camera** — Smooth third-person camera follow
 
-Open the project in Unity 2023.2.20f1.
-Ensure that the following packages are installed:
+### Interactive Elements
+- **Doors** — Toggle open/close with automatic closing on exit
+- **Sitting** — Context-aware sitting with UI feedback
+- **Fire Pits** — Hold to ignite (requires matches)
+- **Collectibles** — Seashells and readable notes
+- **Boat** — Board, disembark, and undock mechanics
+- **Lighthouse Mechanism** — Final objective interaction
+
+### Technical Art Showcases
+
+| Feature | Techniques | Tools |
+|---------|------------|-------|
+| **Ocean System** | Gerstner waves, depth-based color, shore foam, caustics, fresnel reflections, refraction | Shader Graph |
+| **Day/Night Cycle** | Animated sun/moon, sky gradient, window lights, light probes | C#, URP |
+| **Interactive Fire** | Flames, embers, smoke, heat distortion, flickering light | VFX Graph |
+| **Weather Effects** | Rain particles, wet surfaces, puddles, fog, global wind | VFX Graph, Shaders |
+| **Terrain Materials** | Triplanar mapping, height blending, slope detection, shoreline wetness | Shader Graph |
+| **Post-Processing** | Time-of-day LUTs, bloom, depth of field, vignette | URP Volume |
+
+### Architecture
+- **Singleton Managers** — GameManager, AudioManager, InputManager, UIManager
+- **ScriptableObject Event Channels** — Decoupled communication without complex event buses
+
+### UI Systems
+- **Main Menu** — New Game, Continue, Level Select, Options, Quit
+- **Pause Menu** — Resume, Map, Options, Main Menu
+- **Options** — Audio sliders, graphics presets, control sensitivity
+- **HUD** — Interaction prompts, objectives, collectible counter
+- **Mobile Controls** — On-Screen Stick and Button components
+
+## Installation & Setup
+
+### Requirements
+- **Unity** 6.3 or higher
+
+### Required Packages
 1. Input System
 2. TextMesh Pro
-3. Open the **Assets > Scenes > Seaside** Unity Scene
-3. Hit Play in the Unity Editor to explore the scene.
+3. Universal Render Pipeline (URP)
+
+### Steps to Run
+1. Clone the repository:
+   ```
+   git clone https://github.com/raminres/Seaside.git
+   ```
+2. Open the project in Unity 6.3
+3. Open **Assets > Scenes > Seaside**
+4. Hit Play to explore
+
 ## Controls
-Movement: WASD or arrow keys to move the character.
-Camera Control: Use the mouse to rotate the camera.
-Interact with Doors: Press E when near a door to open or close it.
-Sit: Press Q near a sitting area. If you’re not in a sitting area, a UI message will display "Not a sitting place!"
-Models and Assets
-## Assets 
-1. Character: The basic character model is from the Unity Asset Store or customized for this project.
 
-2. Houses: Blender-generated .fbx models with procedural textures applied in Unity.
+| Action | Keyboard/Mouse | Gamepad | Touch |
+|--------|---------------|---------|-------|
+| Move | WASD / Arrow Keys | Left Stick | Virtual Joystick |
+| Camera | Mouse | Right Stick | Drag |
+| Interact | E | A | Interact Button |
+| Sit | E | A | Interact Button |
 
-3. Terrain and Water
-
-4. Boat on the water surface (Addressable)
+## Folder Structure
+```
+Assets/
+├── Scripts/
+│   ├── Core/           # Managers, utilities, extensions
+│   ├── Player/         # Controller, interaction, animation
+│   ├── Interactables/  # Door, Collectible, FireStarter, etc.
+│   ├── Environment/    # WeatherController, DayNightCycle
+│   └── UI/             # Menus, HUD, prompts
+├── Shaders/            # Shader Graph + HLSL includes
+├── VFX/                # VFX Graph assets
+├── Data/               # ScriptableObjects
+│   ├── Events/         # Event channels
+│   └── Settings/       # Game settings
+└── Art/
+    ├── Models/
+    ├── Textures/
+    └── Animations/
+```
 
 ## License
+
 This project is open-source under the MIT License. Feel free to use, modify, and distribute it as needed.
