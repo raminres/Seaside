@@ -9,6 +9,7 @@ public class MobileControlsManager : MonoBehaviour
 {
     [Header("Mobile UI")]
     [SerializeField] private GameObject _mobileControlsCanvas;
+    [SerializeField] private MobileInputHandler _mobileInputHandler;
     
     [Header("Platform Settings")]
     [SerializeField] private bool _enableOnIOS = true;
@@ -19,6 +20,8 @@ public class MobileControlsManager : MonoBehaviour
     [Tooltip("Automatically show mobile controls when touch input is detected")]
     [SerializeField] private bool _autoDetectTouch = false;
 
+    public bool IsMobileControlsEnabled { get; private set; }
+
     private void Awake()
     {
         if (_mobileControlsCanvas == null)
@@ -26,6 +29,13 @@ public class MobileControlsManager : MonoBehaviour
             _mobileControlsCanvas = gameObject;
         }
 
+        if (_mobileInputHandler == null)
+        {
+            _mobileInputHandler = GetComponentInChildren<MobileInputHandler>(true);
+        }
+
+        IsMobileControlsEnabled = ShouldEnableMobileControls();
+        
         UpdateMobileControlsVisibility();
     }
 
@@ -33,23 +43,46 @@ public class MobileControlsManager : MonoBehaviour
     {
         // Double-check visibility after all systems are initialized
         UpdateMobileControlsVisibility();
+        
+        // Sync with PlayerController
+        SyncWithPlayerController();
+    }
+
+    private void SyncWithPlayerController()
+    {
+        var playerController = FindFirstObjectByType<PlayerController>();
+        if (playerController != null && IsMobileControlsEnabled)
+        {
+            // Use reflection or public method to set mobile input mode
+            // For now, we rely on PlayerController finding us
+            Debug.Log("[MobileControlsManager] Mobile controls enabled, PlayerController should use mobile input");
+        }
     }
 
     private void UpdateMobileControlsVisibility()
     {
-        bool shouldEnable = ShouldEnableMobileControls();
+        IsMobileControlsEnabled = ShouldEnableMobileControls();
         
         if (_mobileControlsCanvas != null)
         {
-            _mobileControlsCanvas.SetActive(shouldEnable);
+            _mobileControlsCanvas.SetActive(IsMobileControlsEnabled);
+        }
+
+        // Keep MobileInputHandler active even if canvas is hidden
+        // This allows the input system to work
+        if (_mobileInputHandler != null)
+        {
+            _mobileInputHandler.gameObject.SetActive(IsMobileControlsEnabled);
         }
 
         // Also update cursor visibility for mobile
-        if (shouldEnable)
+        if (IsMobileControlsEnabled)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
+        
+        Debug.Log($"[MobileControlsManager] Mobile controls enabled: {IsMobileControlsEnabled}");
     }
 
     private bool ShouldEnableMobileControls()
@@ -90,6 +123,11 @@ public class MobileControlsManager : MonoBehaviour
         {
             _mobileControlsCanvas.SetActive(true);
         }
+        if (_mobileInputHandler != null)
+        {
+            _mobileInputHandler.gameObject.SetActive(true);
+        }
+        IsMobileControlsEnabled = true;
     }
 
     /// <summary>
@@ -101,6 +139,8 @@ public class MobileControlsManager : MonoBehaviour
         {
             _mobileControlsCanvas.SetActive(false);
         }
+        // Keep input handler active so it can still receive events
+        // Just hide the visual UI
     }
 
     /// <summary>
@@ -110,7 +150,9 @@ public class MobileControlsManager : MonoBehaviour
     {
         if (_mobileControlsCanvas != null)
         {
-            _mobileControlsCanvas.SetActive(!_mobileControlsCanvas.activeSelf);
+            bool newState = !_mobileControlsCanvas.activeSelf;
+            _mobileControlsCanvas.SetActive(newState);
+            IsMobileControlsEnabled = newState;
         }
     }
 

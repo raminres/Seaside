@@ -45,14 +45,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float _bottomClamp = -30f;
     [SerializeField] private float _cameraRotationSpeed = 1f;
 
-    [Header("Audio")]
-    [SerializeField] private PlayerAudioAndVfx _playerAudio;
+    [Header("Audio & VFX")]
+    [SerializeField] private PlayerAudioAndVfx _playerAudioAndVfx;
 
     [Header("Animation")]
     [SerializeField] private PlayerAnimation _playerAnimation;
 
     [Header("Mobile Input (Optional)")]
     [SerializeField] private MobileInputHandler _mobileInputHandler;
+    [SerializeField] private bool _useMobileInput = false;
 
     // State
     public PlayerState CurrentState { get; private set; } = PlayerState.Idle;
@@ -109,32 +110,115 @@ public class PlayerController : MonoBehaviour
             _cinemachineTargetYaw = _cameraTarget.rotation.eulerAngles.y;
         }
 
-        if (_playerAudio == null)
+        if (_playerAudioAndVfx == null)
         {
-            _playerAudio = GetComponentInChildren<PlayerAudioAndVfx>();
+            _playerAudioAndVfx = GetComponentInChildren<PlayerAudioAndVfx>();
         }
 
         if (_playerAnimation == null)
         {
             _playerAnimation = GetComponentInChildren<PlayerAnimation>();
         }
+
+        // Auto-detect mobile platform
+        #if UNITY_IOS || UNITY_ANDROID
+            _useMobileInput = true;
+        #endif
     }
 
     private void Start()
     {
+        // Check MobileControlsManager first to determine if we should use mobile input
+        var mobileControlsManager = FindFirstObjectByType<MobileControlsManager>();
+        if (mobileControlsManager != null && mobileControlsManager.IsMobileControlsEnabled)
+        {
+            _useMobileInput = true;
+            Debug.Log("[PlayerController] MobileControlsManager found and enabled - using mobile input");
+        }
+
+        // Find mobile input handler (do this in Start to ensure it's initialized)
+        if (_mobileInputHandler == null && _useMobileInput)
+        {
+            // First try to find active handler
+            _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            
+            // If not found, try to find inactive one (in case canvas was disabled)
+            if (_mobileInputHandler == null)
+            {
+                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>(FindObjectsInactive.Include);
+            }
+            
+            if (_mobileInputHandler == null)
+            {
+                Debug.LogWarning("[PlayerController] Mobile input enabled but MobileInputHandler not found!");
+            }
+            else
+            {
+                Debug.Log("[PlayerController] Found MobileInputHandler");
+            }
+        }
+
         // Initialize cursor state based on platform
         #if UNITY_IOS || UNITY_ANDROID
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         #else
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            if (!_useMobileInput)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else
+            {
+                // Mobile input in editor - keep cursor visible
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
         #endif
 
         // Ensure input is active
         if (_playerInput != null)
         {
             _playerInput.ActivateInput();
+            
+            // Disable the Look AND Move actions when using mobile input
+            // This prevents <Pointer>/delta from capturing all touch input
+            if (_useMobileInput && _mobileInputHandler != null)
+            {
+                DisableStandardInputActions();
+            }
+        }
+    }
+
+    private void DisableStandardInputActions()
+    {
+        if (_playerInput == null) return;
+
+        // Disable Look action - this is the main culprit for touch issues
+        var lookAction = _playerInput.actions["Look"];
+        if (lookAction != null)
+        {
+            lookAction.Disable();
+            Debug.Log("[PlayerController] Disabled Look action for mobile input");
+        }
+
+        // Also disable Move action since we're using mobile joystick
+        var moveAction = _playerInput.actions["Move"];
+        if (moveAction != null)
+        {
+            moveAction.Disable();
+            Debug.Log("[PlayerController] Disabled Move action for mobile input");
+        }
+
+        Debug.Log("[PlayerController] Mobile input mode active - standard input actions disabled");
+    }
+
+    private void OnEnable()
+    {
+        // Re-disable actions if we're re-enabled
+        if (_useMobileInput && _playerInput != null)
+        {
+            DisableStandardInputActions();
         }
     }
 
@@ -222,9 +306,12 @@ public class PlayerController : MonoBehaviour
         // Ground-based state transitions
         if (IsGrounded)
         {
-            if (_moveInput.sqrMagnitude > Threshold)
+            Vector2 moveInput = GetCurrentMoveInput();
+            bool sprintInput = GetCurrentSprintInput();
+            
+            if (moveInput.sqrMagnitude > Threshold)
             {
-                SetState(_sprintInput ? PlayerState.Running : PlayerState.Walking);
+                SetState(sprintInput ? PlayerState.Running : PlayerState.Walking);
             }
             else
             {
@@ -259,13 +346,13 @@ public class PlayerController : MonoBehaviour
                 {
                     // Determine if hard landing
                     bool hardLanding = _lastVerticalVelocity < _hardLandingVelocity;
-                    _playerAudio?.PlayLandSound(hardLanding);
+                    _playerAudioAndVfx?.PlayLandSound(hardLanding);
                 }
                 break;
 
             case PlayerState.Swimming:
                 if (!_wasSwimming) break;
-                _playerAudio?.PlayExitWaterSound();
+                _playerAudioAndVfx?.PlayExitWaterSound();
                 _wasSwimming = false;
                 break;
         }
@@ -274,13 +361,13 @@ public class PlayerController : MonoBehaviour
         switch (newState)
         {
             case PlayerState.Jumping:
-                _playerAudio?.PlayJumpSound();
+                _playerAudioAndVfx?.PlayJumpSound();
                 break;
 
             case PlayerState.Swimming:
                 if (!_wasSwimming)
                 {
-                    _playerAudio?.PlayEnterWaterSound();
+                    _playerAudioAndVfx?.PlayEnterWaterSound();
                     _wasSwimming = true;
                 }
                 break;
@@ -308,13 +395,17 @@ public class PlayerController : MonoBehaviour
 
     private void HandleGroundMovement()
     {
-        float targetSpeed = _sprintInput ? _runSpeed : _walkSpeed;
-        if (_moveInput == Vector2.zero) targetSpeed = 0f;
+        // Get the correct move input based on mode
+        Vector2 moveInput = GetCurrentMoveInput();
+        bool sprintInput = GetCurrentSprintInput();
+        
+        float targetSpeed = sprintInput ? _runSpeed : _walkSpeed;
+        if (moveInput == Vector2.zero) targetSpeed = 0f;
 
         float currentHorizontalSpeed = new Vector3(_velocity.x, 0f, _velocity.z).magnitude;
 
         float speedOffset = 0.1f;
-        float inputMagnitude = _moveInput.magnitude;
+        float inputMagnitude = moveInput.magnitude;
 
         if (currentHorizontalSpeed < targetSpeed - speedOffset ||
             currentHorizontalSpeed > targetSpeed + speedOffset)
@@ -329,9 +420,9 @@ public class PlayerController : MonoBehaviour
             currentHorizontalSpeed = targetSpeed;
         }
 
-        Vector3 inputDirection = new Vector3(_moveInput.x, 0f, _moveInput.y).normalized;
+        Vector3 inputDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
 
-        if (_moveInput != Vector2.zero)
+        if (moveInput != Vector2.zero)
         {
             _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
                               _mainCamera.transform.eulerAngles.y;
@@ -348,7 +439,10 @@ public class PlayerController : MonoBehaviour
 
     private void HandleSwimming()
     {
-        Vector3 inputDirection = new Vector3(_moveInput.x, 0f, _moveInput.y).normalized;
+        // Get the correct move input based on mode
+        Vector2 moveInput = GetCurrentMoveInput();
+        
+        Vector3 inputDirection = new Vector3(moveInput.x, 0f, moveInput.y).normalized;
 
         if (inputDirection != Vector3.zero)
         {
@@ -364,10 +458,68 @@ public class PlayerController : MonoBehaviour
         float targetY = _waterSurfaceY - 0.5f;
         float verticalMove = (targetY - transform.position.y) * 2f;
 
-        _velocity = moveDirection * _swimSpeed * _moveInput.magnitude;
+        _velocity = moveDirection * _swimSpeed * moveInput.magnitude;
         _velocity.y = verticalMove;
 
         _controller.Move(_velocity * Time.deltaTime);
+    }
+
+    #endregion
+
+    #region Input Helpers
+    
+    private Vector2 GetCurrentMoveInput()
+    {
+        if (_useMobileInput)
+        {
+            // Try to find handler if not yet found
+            if (_mobileInputHandler == null)
+            {
+                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            }
+            
+            if (_mobileInputHandler != null)
+            {
+                return _mobileInputHandler.MoveInput;
+            }
+        }
+        return _moveInput;
+    }
+
+    private Vector2 GetCurrentLookInput()
+    {
+        if (_useMobileInput)
+        {
+            // Try to find handler if not yet found
+            if (_mobileInputHandler == null)
+            {
+                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            }
+            
+            if (_mobileInputHandler != null)
+            {
+                return _mobileInputHandler.LookInput;
+            }
+        }
+        return _lookInput;
+    }
+
+    private bool GetCurrentSprintInput()
+    {
+        if (_useMobileInput)
+        {
+            // Try to find handler if not yet found
+            if (_mobileInputHandler == null)
+            {
+                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            }
+            
+            if (_mobileInputHandler != null)
+            {
+                return _mobileInputHandler.SprintInput;
+            }
+        }
+        return _sprintInput;
     }
 
     #endregion
@@ -430,13 +582,28 @@ public class PlayerController : MonoBehaviour
     private void HandleCameraRotation()
     {
         if (_cameraTarget == null) return;
-        if (_lookInput.sqrMagnitude < Threshold) return;
+        
+        // Get the correct look input based on mode
+        Vector2 lookInput;
+        
+        if (_useMobileInput && _mobileInputHandler != null)
+        {
+            // Mobile mode - get input directly from mobile handler
+            lookInput = _mobileInputHandler.LookInput;
+        }
+        else
+        {
+            // Standard mode - use the cached input from callbacks
+            lookInput = _lookInput;
+        }
+        
+        if (lookInput.sqrMagnitude < Threshold) return;
 
-        bool isCurrentDeviceMouse = _playerInput.currentControlScheme == "Keyboard&Mouse";
+        bool isCurrentDeviceMouse = !_useMobileInput && _playerInput != null && _playerInput.currentControlScheme == "Keyboard&Mouse";
         float deltaTimeMultiplier = isCurrentDeviceMouse ? 1f : Time.deltaTime;
 
-        _cinemachineTargetYaw += _lookInput.x * _cameraRotationSpeed * deltaTimeMultiplier;
-        _cinemachineTargetPitch += _lookInput.y * _cameraRotationSpeed * deltaTimeMultiplier;
+        _cinemachineTargetYaw += lookInput.x * _cameraRotationSpeed * deltaTimeMultiplier;
+        _cinemachineTargetPitch += lookInput.y * _cameraRotationSpeed * deltaTimeMultiplier;
 
         _cinemachineTargetYaw = ClampAngle(_cinemachineTargetYaw, float.MinValue, float.MaxValue);
         _cinemachineTargetPitch = ClampAngle(_cinemachineTargetPitch, _bottomClamp, _topClamp);
@@ -525,21 +692,33 @@ public class PlayerController : MonoBehaviour
 
     public void OnMove(InputValue value)
     {
+        // Ignore standard input when using mobile
+        if (_useMobileInput && _mobileInputHandler != null) return;
+        
         _moveInput = value.Get<Vector2>();
     }
 
     public void OnLook(InputValue value)
     {
+        // Ignore standard input when using mobile
+        if (_useMobileInput && _mobileInputHandler != null) return;
+        
         _lookInput = value.Get<Vector2>();
     }
 
     public void OnSprint(InputValue value)
     {
+        // Ignore standard input when using mobile
+        if (_useMobileInput && _mobileInputHandler != null) return;
+        
         _sprintInput = value.isPressed;
     }
 
     public void OnJump(InputValue value)
     {
+        // Ignore standard input when using mobile
+        if (_useMobileInput && _mobileInputHandler != null) return;
+        
         _jumpInput = value.isPressed;
     }
 
@@ -549,27 +728,20 @@ public class PlayerController : MonoBehaviour
 
     private void ProcessMobileInput()
     {
-        if (_mobileInputHandler == null) return;
+        if (!_useMobileInput || _mobileInputHandler == null) return;
 
-        // Mobile move input - only override if mobile joystick is being used
-        if (_mobileInputHandler.HasMoveInput)
-        {
-            _moveInput = _mobileInputHandler.MoveInput;
-        }
+        // Get mobile inputs directly (replaces standard input entirely)
+        _moveInput = _mobileInputHandler.MoveInput;
+        _lookInput = _mobileInputHandler.LookInput;
+        _sprintInput = _mobileInputHandler.SprintInput;
 
-        // Mobile look input - only override if mobile joystick is being used
-        if (_mobileInputHandler.HasLookInput)
-        {
-            _lookInput = _mobileInputHandler.LookInput;
-        }
+        // Debug - uncomment to see values every frame
+        // if (_moveInput.sqrMagnitude > 0.01f)
+        //     Debug.Log($"[PlayerController] MoveInput from mobile: {_moveInput}");
+        // if (_lookInput.sqrMagnitude > 0.01f)
+        //     Debug.Log($"[PlayerController] LookInput from mobile: {_lookInput}");
 
-        // Sprint from mobile
-        if (_mobileInputHandler.SprintInput)
-        {
-            _sprintInput = true;
-        }
-
-        // Jump from mobile
+        // Jump from mobile (consume after use)
         if (_mobileInputHandler.JumpInput)
         {
             _jumpInput = true;
