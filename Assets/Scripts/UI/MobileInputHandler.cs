@@ -59,6 +59,7 @@ public class MobileInputHandler : MonoBehaviour
 
     /// <summary>
     /// Called by Move Joystick's joystickOutputEvent.
+    /// When joystick is released, UIVirtualJoystick sends Vector2.zero.
     /// </summary>
     public void OnMoveJoystick(Vector2 value)
     {
@@ -72,10 +73,20 @@ public class MobileInputHandler : MonoBehaviour
 
     /// <summary>
     /// Called by Look Joystick's joystickOutputEvent.
+    /// When joystick is released, UIVirtualJoystick sends Vector2.zero.
     /// </summary>
     public void OnLookJoystick(Vector2 value)
     {
-        _lookInput = value * _lookSensitivity;
+        // Only apply sensitivity when there's actual input
+        // This ensures zero stays zero
+        if (value.sqrMagnitude > 0.001f)
+        {
+            _lookInput = value * _lookSensitivity;
+        }
+        else
+        {
+            _lookInput = Vector2.zero;
+        }
         
         if (_debugLog && value.sqrMagnitude > 0.01f)
         {
@@ -192,7 +203,31 @@ public class MobileInputHandler : MonoBehaviour
         _jumpInput = false;
         _sprintInput = false;
         _interactInput = false;
+        
+        if (_debugLog) Debug.Log("[MobileInput] All inputs reset");
+    }
+
+    /// <summary>
+    /// Reset movement input only.
+    /// </summary>
+    public void ResetMoveInput()
+    {
+        _moveInput = Vector2.zero;
+    }
+
+    /// <summary>
+    /// Reset look input only.
+    /// </summary>
+    public void ResetLookInput()
+    {
+        _lookInput = Vector2.zero;
     }
 
     #endregion
+
+    private void OnDisable()
+    {
+        // Reset all inputs when disabled to prevent stuck inputs
+        ResetAllInputs();
+    }
 }

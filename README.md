@@ -80,7 +80,7 @@ Assets/
 │   ├── Player/         # Controller, interaction, animation
 │   ├── Interactables/  # Door, Collectible, FireStarter, etc.
 │   ├── Environment/    # WeatherController, DayNightCycle
-│   └── UI/             # Menus, HUD, prompts
+│   └── UI/             # Menus, HUD, promptsg
 ├── Shaders/            # Shader Graph + HLSL includes
 ├── VFX/                # VFX Graph assets
 ├── Data/               # ScriptableObjects
