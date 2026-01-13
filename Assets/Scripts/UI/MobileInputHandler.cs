@@ -65,6 +65,12 @@ public class MobileInputHandler : MonoBehaviour
     {
         _moveInput = value;
         
+        // Reset sprint when movement stops
+        if (value.sqrMagnitude < 0.01f)
+        {
+            _sprintInput = false;
+        }
+        
         if (_debugLog && value.sqrMagnitude > 0.01f)
         {
             Debug.Log($"[MobileInput] Move: {value}");
