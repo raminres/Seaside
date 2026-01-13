@@ -118,7 +118,7 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
-    - _DepthDistance: 3.28
+    - _DepthDistance: 2.84
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -146,14 +146,14 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _WaterSpeedX: 0.01
-    - _WaterSpeedY: 0.01
+    - _WaterSpeedX: 0.001
+    - _WaterSpeedY: 0.001
     - _WaveChaos: 1
-    - _WaveDirection: 0
+    - _WaveDirection: -90
     - _WaveIntensity: 0
     - _WaveSize: 24.7
-    - _WaveSpeedX: 0.01
-    - _WaveSpeedY: 0.01
+    - _WaveSpeedX: 0.001
+    - _WaveSpeedY: 0.001
     - _Waves: 1
     - _WorkflowMode: 1
     - _ZWrite: 1
@@ -164,9 +164,9 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 1, g: 0, b: 0, a: 1}
     - _MainColor: {r: 0.084846295, g: 0.34774962, b: 0.41509432, a: 0.7490196}
-    - _NormalSize: {r: 3, g: 3, b: 0, a: 0}
+    - _NormalSize: {r: 10, g: 10, b: 0, a: 0}
     - _PeaksColor: {r: 0.95, g: 0.95, b: 0.95, a: 0.99215686}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _WaveSize: {r: 0.52, g: 3, b: 0, a: 0}
+    - _WaveSize: {r: 1.96, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
