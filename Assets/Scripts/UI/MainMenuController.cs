@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -27,6 +28,12 @@ public class MainMenuController : MonoBehaviour
     [Header("Volume")]
     public Slider volumeSlider;
 
+    [Header("FPS Settings")]
+    [Tooltip("Toggle for 60 FPS mode (on = 60, off = 30)")]
+    public Toggle fpsToggle;
+    [Tooltip("Optional: Text to show current FPS")]
+    public TextMeshProUGUI fpsValueText;
+
     [Header("Scene Name")]
     public string gameSceneName = "LV_Diaroma";
 
@@ -39,21 +46,130 @@ public class MainMenuController : MonoBehaviour
         {
             float savedVolume = PlayerPrefs.GetFloat("Volume");
             AudioListener.volume = savedVolume;
-            volumeSlider.value = savedVolume;
+            if (volumeSlider != null)
+            {
+                volumeSlider.value = savedVolume;
+            }
         }
         else
         {
-            AudioListener.volume = 1.0f; // Default volume
-            volumeSlider.value = 1.0f;
+            AudioListener.volume = 1.0f;
+            if (volumeSlider != null)
+            {
+                volumeSlider.value = 1.0f;
+            }
         }
+
+        // Load saved FPS setting
+        InitializeFPSToggle();
     }
+
+    #region FPS Settings
+
+    private void InitializeFPSToggle()
+    {
+        if (fpsToggle == null) return;
+
+        // Load current setting from GameManager or PlayerPrefs
+        bool isHighFPS = true;
+        if (GameManager.Instance != null)
+        {
+            isHighFPS = GameManager.Instance.IsHighFPSEnabled();
+        }
+        else
+        {
+            isHighFPS = PlayerPrefs.GetInt("TargetFPS", 60) == 60;
+        }
+
+        // Set toggle without triggering the callback
+        fpsToggle.SetIsOnWithoutNotify(isHighFPS);
+        
+        // Add listener
+        fpsToggle.onValueChanged.AddListener(OnFPSToggleChanged);
+
+        // Update text
+        UpdateFPSValueText();
+    }
+
+    public void OnFPSToggleChanged(bool isHighFPS)
+    {
+        PlayClickSound();
+        
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetHighFPSMode(isHighFPS);
+        }
+        else
+        {
+            // Fallback if GameManager not available
+            int fps = isHighFPS ? 60 : 30;
+            Application.targetFrameRate = fps;
+            PlayerPrefs.SetInt("TargetFPS", fps);
+            PlayerPrefs.Save();
+        }
+
+        UpdateFPSValueText();
+    }
+
+    /// <summary>
+    /// Alternative method for a button that toggles FPS.
+    /// </summary>
+    public void ToggleFPS()
+    {
+        PlayClickSound();
+        
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ToggleFPS();
+        }
+        else
+        {
+            int currentFPS = PlayerPrefs.GetInt("TargetFPS", 60);
+            int newFPS = currentFPS == 30 ? 60 : 30;
+            Application.targetFrameRate = newFPS;
+            PlayerPrefs.SetInt("TargetFPS", newFPS);
+            PlayerPrefs.Save();
+        }
+
+        // Update toggle if it exists
+        if (fpsToggle != null)
+        {
+            bool isHighFPS = GameManager.Instance != null 
+                ? GameManager.Instance.IsHighFPSEnabled() 
+                : PlayerPrefs.GetInt("TargetFPS", 60) == 60;
+            fpsToggle.SetIsOnWithoutNotify(isHighFPS);
+        }
+
+        UpdateFPSValueText();
+    }
+
+    private void UpdateFPSValueText()
+    {
+        if (fpsValueText == null) return;
+
+        int fps;
+        if (GameManager.Instance != null)
+        {
+            fps = GameManager.Instance.GetTargetFPS();
+        }
+        else
+        {
+            fps = PlayerPrefs.GetInt("TargetFPS", 60);
+        }
+
+        fpsValueText.text = $"{fps} FPS";
+    }
+
+    #endregion
+
+    #region Menu Navigation
 
     public void StartGame()
     {
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
-            GameManager.Instance.ShowLevelSelection(); // Open Level Selection UI instead of loading a level
+            GameManager.Instance.ShowLevelSelection();
         }));
     }
 
@@ -88,7 +204,7 @@ public class MainMenuController : MonoBehaviour
     public void ConfirmQuit()
     {
         PlayClickSound();
-        GameManager.Instance.QuitGame(); // Use GameManager's quit method
+        GameManager.Instance.QuitGame();
     }
 
     public void CancelQuit()
@@ -118,16 +234,26 @@ public class MainMenuController : MonoBehaviour
         }));
     }
 
+    #endregion
+
+    #region Volume
+
     public void AdjustVolume(float volume)
     {
         Debug.Log($"AdjustVolume called with value: {volume}");
         volume = volumeSlider.value;
         AudioListener.volume = volume;
-        PlayerPrefs.SetFloat("Volume", volume); // Save the volume setting
+        PlayerPrefs.SetFloat("Volume", volume);
 
-        // Inform GameManager about volume change
-        GameManager.Instance.UpdateVolume(volume);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.UpdateVolume(volume);
+        }
     }
+
+    #endregion
+
+    #region Canvas Helpers
 
     private void ShowCanvasWithAnimation(GameObject canvas, Animator animator)
     {
@@ -166,6 +292,10 @@ public class MainMenuController : MonoBehaviour
         quitConfirmationCanvas.SetActive(false);
     }
 
+    #endregion
+
+    #region Audio
+
     public void PlayHoverSound()
     {
         if (hoverSound != null)
@@ -181,4 +311,6 @@ public class MainMenuController : MonoBehaviour
             audioSource.PlayOneShot(clickSound);
         }
     }
+
+    #endregion
 }

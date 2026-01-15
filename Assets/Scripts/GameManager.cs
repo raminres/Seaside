@@ -68,7 +68,10 @@ public class GameManager : MonoBehaviour
 
         // Disable VSync so targetFrameRate is respected
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
+        
+        // Load FPS setting from PlayerPrefs (default 60)
+        int savedFPS = PlayerPrefs.GetInt("TargetFPS", 60);
+        Application.targetFrameRate = savedFPS;
     }
 
     private void Start()
@@ -517,6 +520,59 @@ public class GameManager : MonoBehaviour
     public float GetVolume()
     {
         return PlayerPrefs.GetFloat("Volume", 1f);
+    }
+
+    #endregion
+
+    #region FPS Settings
+
+    /// <summary>
+    /// Set target frame rate. Use 30 or 60.
+    /// </summary>
+    public void SetTargetFPS(int fps)
+    {
+        // Clamp to valid values
+        fps = fps <= 30 ? 30 : 60;
+        
+        Application.targetFrameRate = fps;
+        PlayerPrefs.SetInt("TargetFPS", fps);
+        PlayerPrefs.Save();
+        
+        Debug.Log($"[GameManager] Target FPS set to {fps}");
+    }
+
+    /// <summary>
+    /// Toggle between 30 and 60 FPS.
+    /// </summary>
+    public void ToggleFPS()
+    {
+        int currentFPS = GetTargetFPS();
+        int newFPS = currentFPS == 30 ? 60 : 30;
+        SetTargetFPS(newFPS);
+    }
+
+    /// <summary>
+    /// Get current target FPS setting.
+    /// </summary>
+    public int GetTargetFPS()
+    {
+        return PlayerPrefs.GetInt("TargetFPS", 60);
+    }
+
+    /// <summary>
+    /// Check if high FPS mode (60) is enabled.
+    /// </summary>
+    public bool IsHighFPSEnabled()
+    {
+        return GetTargetFPS() == 60;
+    }
+
+    /// <summary>
+    /// Set high FPS mode on or off.
+    /// </summary>
+    public void SetHighFPSMode(bool enabled)
+    {
+        SetTargetFPS(enabled ? 60 : 30);
     }
 
     #endregion
