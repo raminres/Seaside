@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92062452493ad2947b512c7624e69ec4, type: 3}
   m_Name: DayNightPreset
   m_EditorClassIdentifier: Assembly-CSharp::DayNightPreset
-  dayLengthMinutes: 3
+  dayLengthMinutes: 5
   sunColor:
     serializedVersion: 2
     key0: {r: 0.2, g: 0.2, b: 0.4, a: 1}
@@ -130,8 +130,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  maxSunIntensity: 1.2
-  sunOrbitAngle: 270
+  maxSunIntensity: 2
+  sunOrbitAngle: 0
   moonColor: {r: 0.6, g: 0.7, b: 1, a: 1}
   moonIntensity: 0.3
   ambientColor:
@@ -307,7 +307,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   maxFogDensity: 0.02
-  skyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  skyboxMaterial: {fileID: 2100000, guid: aeab33f69c199e54794f516d31450ec4, type: 2}
   skyboxExposureParam: _Exposure
   skyboxExposure:
     serializedVersion: 2

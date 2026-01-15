@@ -27,7 +27,7 @@ public class PlayerInteraction : MonoBehaviour
     
     private bool _isHolding;
     private float _holdTimer;
-    private bool _wasInteractPressed;
+    private bool _wasButtonDownLastFrame;
 
     public IInteractable CurrentInteractable => _currentInteractable;
     public bool HasInteractable => _currentInteractable != null && _currentInteractable.CanInteract;
@@ -44,16 +44,19 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Start()
     {
-        // Auto-find UI if not assigned
         if (_interactionPromptUI == null)
         {
             _interactionPromptUI = FindFirstObjectByType<InteractionPromptUI>();
         }
 
-        // Auto-find mobile input handler
         if (_mobileInputHandler == null)
         {
             _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            
+            if (_mobileInputHandler != null && _debugLog)
+            {
+                Debug.Log("[PlayerInteraction] Found MobileInputHandler");
+            }
         }
     }
 
@@ -71,54 +74,52 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (_mobileInputHandler == null) return;
 
-        bool isPressed = _mobileInputHandler.InteractInput;
+        // Check for new press this frame
+        bool pressedThisFrame = _mobileInputHandler.InteractPressedThisFrame;
+        bool buttonDown = _mobileInputHandler.InteractButtonDown;
 
-        // Detect press/release for mobile
-        if (isPressed && !_wasInteractPressed)
+        // New press detected
+        if (pressedThisFrame)
         {
-            // Just pressed
-            OnInteractPressed();
-        }
-        else if (!isPressed && _wasInteractPressed)
-        {
-            // Just released
-            OnInteractReleased();
-        }
-
-        _wasInteractPressed = isPressed;
-    }
-
-    private void OnInteractPressed()
-    {
-        if (_currentInteractable == null || !_currentInteractable.CanInteract)
-            return;
-
-        switch (_currentInteractable.InteractionType)
-        {
-            case InteractionType.Instant:
-            case InteractionType.Toggle:
-                CompleteInteraction();
-                break;
-
-            case InteractionType.Hold:
-                _isHolding = true;
-                _holdTimer = 0f;
-                break;
-        }
-    }
-
-    private void OnInteractReleased()
-    {
-        if (_currentInteractable != null && _currentInteractable.InteractionType == InteractionType.Hold)
-        {
-            _isHolding = false;
-            _holdTimer = 0f;
+            if (_debugLog) Debug.Log("[PlayerInteraction] Mobile interact pressed this frame");
             
-            if (_interactionPromptUI != null)
+            if (_currentInteractable != null && _currentInteractable.CanInteract)
             {
-                _interactionPromptUI.SetHoldProgress(0f);
+                if (_debugLog) Debug.Log($"[PlayerInteraction] Starting interaction with {(_currentInteractable as MonoBehaviour)?.gameObject.name}");
+                
+                switch (_currentInteractable.InteractionType)
+                {
+                    case InteractionType.Instant:
+                    case InteractionType.Toggle:
+                        CompleteInteraction();
+                        break;
+
+                    case InteractionType.Hold:
+                        _isHolding = true;
+                        _holdTimer = 0f;
+                        break;
+                }
             }
         }
+        
+        // Button released - cancel hold if in progress
+        if (!buttonDown && _wasButtonDownLastFrame)
+        {
+            if (_debugLog) Debug.Log("[PlayerInteraction] Mobile interact released");
+            
+            if (_isHolding)
+            {
+                _isHolding = false;
+                _holdTimer = 0f;
+                
+                if (_interactionPromptUI != null)
+                {
+                    _interactionPromptUI.SetHoldProgress(0f);
+                }
+            }
+        }
+
+        _wasButtonDownLastFrame = buttonDown;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -134,7 +135,7 @@ public class PlayerInteraction : MonoBehaviour
             _interactablesInRange.Add(interactable);
             
             if (_debugLog)
-                Debug.Log($"Interactable entered range: {other.gameObject.name}");
+                Debug.Log($"[PlayerInteraction] Interactable entered range: {other.gameObject.name}");
         }
     }
 
@@ -151,7 +152,7 @@ public class PlayerInteraction : MonoBehaviour
             _interactablesInRange.Remove(interactable);
             
             if (_debugLog)
-                Debug.Log($"Interactable left range: {other.gameObject.name}");
+                Debug.Log($"[PlayerInteraction] Interactable left range: {other.gameObject.name}");
 
             if (interactable == _currentInteractable)
             {
@@ -163,7 +164,6 @@ public class PlayerInteraction : MonoBehaviour
 
     private void UpdateBestInteractable()
     {
-        // Clean up any null references (destroyed objects)
         _interactablesInRange.RemoveAll(i => i == null || (i as MonoBehaviour) == null);
 
         IInteractable bestInteractable = null;
@@ -189,7 +189,6 @@ public class PlayerInteraction : MonoBehaviour
             }
         }
 
-        // Update if changed
         if (bestInteractable != _currentInteractable)
         {
             _currentInteractable?.OnUnfocused();
@@ -205,7 +204,7 @@ public class PlayerInteraction : MonoBehaviour
             }
             
             if (_debugLog)
-                Debug.Log($"Current interactable: {(_currentInteractable != null ? (_currentInteractable as MonoBehaviour)?.gameObject.name : "null")}");
+                Debug.Log($"[PlayerInteraction] Current interactable: {(_currentInteractable != null ? (_currentInteractable as MonoBehaviour)?.gameObject.name : "null")}");
         }
     }
 
@@ -234,6 +233,8 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (_currentInteractable == null) return;
 
+        if (_debugLog) Debug.Log($"[PlayerInteraction] Completing interaction with {(_currentInteractable as MonoBehaviour)?.gameObject.name}");
+
         _currentInteractable.Interact(_playerController);
         
         _isHolding = false;
@@ -245,7 +246,7 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    #region Input Callbacks
+    #region Input Callbacks (Keyboard/Gamepad)
 
     public void OnInteract(InputValue value)
     {
