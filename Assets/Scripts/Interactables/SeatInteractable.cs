@@ -30,12 +30,17 @@ public class SeatInteractable : InteractableBase
     [SerializeField] private UnityEvent _onPlayerSat;
     [SerializeField] private UnityEvent _onPlayerStood;
 
+    [Header("Debug")]
+    [SerializeField] private bool _debugLog = false;
+
     private bool _isOccupied;
     private PlayerController _seatedPlayer;
     private PlayerAnimation _seatedPlayerAnimation;
     private CharacterController _playerCharacterController;
     private PlayerInput _playerInput;
     private InputAction _interactAction;
+    private MobileInputHandler _mobileInputHandler;
+    private bool _wasInteractPressedLastFrame;
     
     private Vector3 _originalPlayerPosition;
     private Quaternion _originalPlayerRotation;
@@ -65,10 +70,48 @@ public class SeatInteractable : InteractableBase
     private void Update()
     {
         // Handle stand up input while seated
-        if (_isOccupied && !_isTransitioning && _interactAction != null)
+        if (_isOccupied && !_isTransitioning)
         {
-            if (_interactAction.WasPressedThisFrame())
+            bool interactPressed = false;
+            
+            // Check standard input action
+            if (_interactAction != null)
             {
+                try
+                {
+                    if (_interactAction.WasPressedThisFrame())
+                    {
+                        interactPressed = true;
+                        if (_debugLog) Debug.Log("[SeatInteractable] Stand up triggered by keyboard/gamepad");
+                    }
+                }
+                catch (System.Exception)
+                {
+                    // Action might be disabled, ignore
+                }
+            }
+            
+            // Check mobile input - detect rising edge (was not pressed, now is pressed)
+            if (_mobileInputHandler != null)
+            {
+                bool currentlyPressed = _mobileInputHandler.InteractInput;
+                
+                if (_debugLog && currentlyPressed)
+                {
+                    Debug.Log($"[SeatInteractable] Mobile interact: current={currentlyPressed}, lastFrame={_wasInteractPressedLastFrame}");
+                }
+                
+                if (currentlyPressed && !_wasInteractPressedLastFrame)
+                {
+                    interactPressed = true;
+                    if (_debugLog) Debug.Log("[SeatInteractable] Stand up triggered by mobile button");
+                }
+                _wasInteractPressedLastFrame = currentlyPressed;
+            }
+            
+            if (interactPressed)
+            {
+                if (_debugLog) Debug.Log("[SeatInteractable] Starting stand up sequence");
                 StartCoroutine(StandUpSequence());
             }
         }
@@ -92,10 +135,11 @@ public class SeatInteractable : InteractableBase
             // Can't interact if transitioning
             if (_isTransitioning) return false;
             
-            // Can't sit if already occupied
-            if (_isOccupied) return false;
+            // Can sit if not occupied
+            if (!_isOccupied) return base.CanInteract;
             
-            return base.CanInteract;
+            // Can't use normal interaction while occupied (stand up is handled in Update)
+            return false;
         }
     }
 
@@ -105,7 +149,7 @@ public class SeatInteractable : InteractableBase
 
         if (!_isOccupied)
         {
-            // Player wants to sit down
+            if (_debugLog) Debug.Log("[SeatInteractable] Player sitting down");
             StartCoroutine(SitDownSequence(player));
         }
     }
@@ -123,6 +167,17 @@ public class SeatInteractable : InteractableBase
         if (_playerInput != null)
         {
             _interactAction = _playerInput.actions["Interact"];
+            if (_debugLog) Debug.Log($"[SeatInteractable] Got interact action: {_interactAction != null}");
+        }
+        
+        // Get mobile input handler for stand up detection
+        _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+        if (_mobileInputHandler != null)
+        {
+            // Consume any existing interact input to prevent immediate stand-up
+            _mobileInputHandler.ConsumeInteract();
+            _wasInteractPressedLastFrame = true; // Prevent immediate trigger
+            if (_debugLog) Debug.Log("[SeatInteractable] Found MobileInputHandler, consumed existing input");
         }
 
         // Store original position/rotation for standing up
@@ -172,7 +227,14 @@ public class SeatInteractable : InteractableBase
         }
 
         _isTransitioning = false;
+        
+        // Reset mobile input state after a short delay to allow for input to settle
+        yield return null;
+        _wasInteractPressedLastFrame = _mobileInputHandler != null && _mobileInputHandler.InteractInput;
+        
         _onPlayerSat?.Invoke();
+        
+        if (_debugLog) Debug.Log("[SeatInteractable] Sit down complete, ready for stand up input");
     }
 
     private System.Collections.IEnumerator StandUpSequence()
@@ -183,6 +245,8 @@ public class SeatInteractable : InteractableBase
 
         // Store reference before clearing
         PlayerController player = _seatedPlayer;
+        
+        if (_debugLog) Debug.Log("[SeatInteractable] Standing up...");
         
         // Play stand sound
         if (_standSound != null && _audioSource != null)
@@ -234,14 +298,33 @@ public class SeatInteractable : InteractableBase
 
         _onPlayerStood?.Invoke();
 
-        // Clear references
+        // Clear references BEFORE setting flags
         _seatedPlayer = null;
         _seatedPlayerAnimation = null;
         _playerCharacterController = null;
         _playerInput = null;
         _interactAction = null;
+        _mobileInputHandler = null;
+        _wasInteractPressedLastFrame = false;
+        
+        // Set flags last
         _isOccupied = false;
         _isTransitioning = false;
+        
+        if (_debugLog) Debug.Log("[SeatInteractable] Stand up complete, seat is now available");
+    }
+
+    /// <summary>
+    /// Called by mobile UI button to trigger stand up.
+    /// Wire this directly to the Interact button if needed.
+    /// </summary>
+    public void TriggerStandUp()
+    {
+        if (_isOccupied && !_isTransitioning)
+        {
+            if (_debugLog) Debug.Log("[SeatInteractable] TriggerStandUp called directly");
+            StartCoroutine(StandUpSequence());
+        }
     }
 
     /// <summary>
@@ -280,6 +363,8 @@ public class SeatInteractable : InteractableBase
         _playerCharacterController = null;
         _playerInput = null;
         _interactAction = null;
+        _mobileInputHandler = null;
+        _wasInteractPressedLastFrame = false;
         _isOccupied = false;
         _isTransitioning = false;
     }
