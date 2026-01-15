@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// Bridges mobile UI controls (virtual joysticks, buttons) to PlayerController.
-/// Attach to a manager object or the Mobile Controls Canvas.
+/// Bridges mobile UI controls (virtual joysticks, buttons) to game systems.
+/// Uses frame-based input tracking to prevent input conflicts between systems.
 /// </summary>
 public class MobileInputHandler : MonoBehaviour
 {
@@ -33,7 +33,11 @@ public class MobileInputHandler : MonoBehaviour
     private Vector2 _lookInput;
     private bool _jumpInput;
     private bool _sprintInput;
-    private bool _interactInput;
+    
+    // Interact button state
+    private bool _interactButtonDown;      // Physical button state
+    private bool _interactPressedThisFrame; // True only on the frame button was pressed
+    private int _interactPressFrame = -1;   // Frame number when pressed
 
     private void Awake()
     {
@@ -55,17 +59,22 @@ public class MobileInputHandler : MonoBehaviour
         }
     }
 
-    #region Joystick Callbacks (Connect to UIVirtualJoystick.joystickOutputEvent)
+    private void LateUpdate()
+    {
+        // Clear the "pressed this frame" flag at end of frame
+        // This ensures all systems have a chance to see it during Update
+        if (_interactPressedThisFrame && Time.frameCount > _interactPressFrame)
+        {
+            _interactPressedThisFrame = false;
+        }
+    }
 
-    /// <summary>
-    /// Called by Move Joystick's joystickOutputEvent.
-    /// When joystick is released, UIVirtualJoystick sends Vector2.zero.
-    /// </summary>
+    #region Joystick Callbacks
+
     public void OnMoveJoystick(Vector2 value)
     {
         _moveInput = value;
         
-        // Reset sprint when movement stops
         if (value.sqrMagnitude < 0.01f)
         {
             _sprintInput = false;
@@ -77,14 +86,8 @@ public class MobileInputHandler : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Called by Look Joystick's joystickOutputEvent.
-    /// When joystick is released, UIVirtualJoystick sends Vector2.zero.
-    /// </summary>
     public void OnLookJoystick(Vector2 value)
     {
-        // Only apply sensitivity when there's actual input
-        // This ensures zero stays zero
         if (value.sqrMagnitude > 0.001f)
         {
             _lookInput = value * _lookSensitivity;
@@ -102,128 +105,119 @@ public class MobileInputHandler : MonoBehaviour
 
     #endregion
 
-    #region Button Callbacks (Connect to Button OnClick or use EventTrigger)
+    #region Button Callbacks
 
-    /// <summary>
-    /// Called when Jump button is pressed.
-    /// </summary>
     public void OnJumpPressed()
     {
         _jumpInput = true;
         if (_debugLog) Debug.Log("[MobileInput] Jump Pressed");
     }
 
-    /// <summary>
-    /// Called when Jump button is released.
-    /// </summary>
     public void OnJumpReleased()
     {
         _jumpInput = false;
         if (_debugLog) Debug.Log("[MobileInput] Jump Released");
     }
 
-    /// <summary>
-    /// Called when Sprint button is pressed (hold).
-    /// </summary>
     public void OnSprintPressed()
     {
         _sprintInput = true;
         if (_debugLog) Debug.Log("[MobileInput] Sprint Pressed");
     }
 
-    /// <summary>
-    /// Called when Sprint button is released.
-    /// </summary>
     public void OnSprintReleased()
     {
         _sprintInput = false;
         if (_debugLog) Debug.Log("[MobileInput] Sprint Released");
     }
 
-    /// <summary>
-    /// Toggle sprint on/off (alternative for tap-to-toggle sprint).
-    /// </summary>
     public void OnSprintToggle()
     {
         _sprintInput = !_sprintInput;
         if (_debugLog) Debug.Log($"[MobileInput] Sprint Toggled: {_sprintInput}");
     }
 
-    /// <summary>
-    /// Called when Interact button is pressed.
-    /// </summary>
     public void OnInteractPressed()
     {
-        _interactInput = true;
-        if (_debugLog) Debug.Log("[MobileInput] Interact Pressed");
+        _interactButtonDown = true;
+        _interactPressedThisFrame = true;
+        _interactPressFrame = Time.frameCount;
+        
+        if (_debugLog) Debug.Log($"[MobileInput] Interact Pressed (frame {Time.frameCount})");
     }
 
-    /// <summary>
-    /// Called when Interact button is released.
-    /// </summary>
     public void OnInteractReleased()
     {
-        _interactInput = false;
-        if (_debugLog) Debug.Log("[MobileInput] Interact Released");
+        _interactButtonDown = false;
+        
+        if (_debugLog) Debug.Log($"[MobileInput] Interact Released (frame {Time.frameCount})");
     }
 
     #endregion
 
-    #region Input Value Getters (For PlayerController if using direct reference)
+    #region Input Getters
 
     public Vector2 MoveInput => _moveInput;
     public Vector2 LookInput => _lookInput;
     public bool JumpInput => _jumpInput;
     public bool SprintInput => _sprintInput;
-    public bool InteractInput => _interactInput;
-
+    
     /// <summary>
-    /// Check if any mobile input is active.
+    /// True if the interact button is currently held down.
     /// </summary>
+    public bool InteractButtonDown => _interactButtonDown;
+    
+    /// <summary>
+    /// True only on the frame the interact button was pressed.
+    /// Multiple systems can check this in the same frame.
+    /// </summary>
+    public bool InteractPressedThisFrame => _interactPressedThisFrame;
+    
+    /// <summary>
+    /// Legacy property for backward compatibility.
+    /// Returns true if button is down OR was pressed this frame.
+    /// </summary>
+    public bool InteractInput => _interactButtonDown || _interactPressedThisFrame;
+    
+    // Legacy properties for compatibility
+    public bool InteractHeld => _interactButtonDown;
+    public bool InteractTriggered => _interactPressedThisFrame;
+
     public bool HasMoveInput => _moveInput.sqrMagnitude > 0.01f;
     public bool HasLookInput => _lookInput.sqrMagnitude > 0.01f;
 
-    /// <summary>
-    /// Consume jump input (call after processing jump).
-    /// </summary>
     public void ConsumeJump()
     {
         _jumpInput = false;
     }
 
     /// <summary>
-    /// Consume interact input (call after processing interact).
+    /// Legacy method - no longer needed but kept for compatibility.
+    /// The input auto-clears at end of frame via LateUpdate.
     /// </summary>
     public void ConsumeInteract()
     {
-        _interactInput = false;
+        // No-op - input clears automatically in LateUpdate
+        // This prevents systems from interfering with each other
     }
 
-    /// <summary>
-    /// Reset all inputs (call when disabling mobile controls).
-    /// </summary>
     public void ResetAllInputs()
     {
         _moveInput = Vector2.zero;
         _lookInput = Vector2.zero;
         _jumpInput = false;
         _sprintInput = false;
-        _interactInput = false;
+        _interactButtonDown = false;
+        _interactPressedThisFrame = false;
         
         if (_debugLog) Debug.Log("[MobileInput] All inputs reset");
     }
 
-    /// <summary>
-    /// Reset movement input only.
-    /// </summary>
     public void ResetMoveInput()
     {
         _moveInput = Vector2.zero;
     }
 
-    /// <summary>
-    /// Reset look input only.
-    /// </summary>
     public void ResetLookInput()
     {
         _lookInput = Vector2.zero;
@@ -233,7 +227,6 @@ public class MobileInputHandler : MonoBehaviour
 
     private void OnDisable()
     {
-        // Reset all inputs when disabled to prevent stuck inputs
         ResetAllInputs();
     }
 }

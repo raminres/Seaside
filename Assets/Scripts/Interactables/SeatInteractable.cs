@@ -40,7 +40,9 @@ public class SeatInteractable : InteractableBase
     private PlayerInput _playerInput;
     private InputAction _interactAction;
     private MobileInputHandler _mobileInputHandler;
-    private bool _wasInteractPressedLastFrame;
+    
+    // Frame tracking to prevent same-frame sit+stand
+    private int _sitCompletedFrame = -1;
     
     private Vector3 _originalPlayerPosition;
     private Quaternion _originalPlayerRotation;
@@ -72,9 +74,15 @@ public class SeatInteractable : InteractableBase
         // Handle stand up input while seated
         if (_isOccupied && !_isTransitioning)
         {
+            // Don't allow stand up on the same frame we finished sitting
+            if (Time.frameCount <= _sitCompletedFrame + 1)
+            {
+                return;
+            }
+            
             bool interactPressed = false;
             
-            // Check standard input action
+            // Check standard input action (keyboard/gamepad)
             if (_interactAction != null)
             {
                 try
@@ -91,22 +99,14 @@ public class SeatInteractable : InteractableBase
                 }
             }
             
-            // Check mobile input - detect rising edge (was not pressed, now is pressed)
+            // Check mobile input - use InteractPressedThisFrame for clean detection
             if (_mobileInputHandler != null)
             {
-                bool currentlyPressed = _mobileInputHandler.InteractInput;
-                
-                if (_debugLog && currentlyPressed)
-                {
-                    Debug.Log($"[SeatInteractable] Mobile interact: current={currentlyPressed}, lastFrame={_wasInteractPressedLastFrame}");
-                }
-                
-                if (currentlyPressed && !_wasInteractPressedLastFrame)
+                if (_mobileInputHandler.InteractPressedThisFrame)
                 {
                     interactPressed = true;
                     if (_debugLog) Debug.Log("[SeatInteractable] Stand up triggered by mobile button");
                 }
-                _wasInteractPressedLastFrame = currentlyPressed;
             }
             
             if (interactPressed)
@@ -174,10 +174,7 @@ public class SeatInteractable : InteractableBase
         _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
         if (_mobileInputHandler != null)
         {
-            // Consume any existing interact input to prevent immediate stand-up
-            _mobileInputHandler.ConsumeInteract();
-            _wasInteractPressedLastFrame = true; // Prevent immediate trigger
-            if (_debugLog) Debug.Log("[SeatInteractable] Found MobileInputHandler, consumed existing input");
+            if (_debugLog) Debug.Log("[SeatInteractable] Found MobileInputHandler");
         }
 
         // Store original position/rotation for standing up
@@ -228,13 +225,12 @@ public class SeatInteractable : InteractableBase
 
         _isTransitioning = false;
         
-        // Reset mobile input state after a short delay to allow for input to settle
-        yield return null;
-        _wasInteractPressedLastFrame = _mobileInputHandler != null && _mobileInputHandler.InteractInput;
+        // Record the frame we completed sitting to prevent immediate stand-up
+        _sitCompletedFrame = Time.frameCount;
         
         _onPlayerSat?.Invoke();
         
-        if (_debugLog) Debug.Log("[SeatInteractable] Sit down complete, ready for stand up input");
+        if (_debugLog) Debug.Log($"[SeatInteractable] Sit down complete on frame {_sitCompletedFrame}, ready for stand up input");
     }
 
     private System.Collections.IEnumerator StandUpSequence()
@@ -305,7 +301,6 @@ public class SeatInteractable : InteractableBase
         _playerInput = null;
         _interactAction = null;
         _mobileInputHandler = null;
-        _wasInteractPressedLastFrame = false;
         
         // Set flags last
         _isOccupied = false;
@@ -364,7 +359,6 @@ public class SeatInteractable : InteractableBase
         _playerInput = null;
         _interactAction = null;
         _mobileInputHandler = null;
-        _wasInteractPressedLastFrame = false;
         _isOccupied = false;
         _isTransitioning = false;
     }
