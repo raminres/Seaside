@@ -9,7 +9,7 @@ TerrainLayer:
   m_Name: TL_GrassyGround_B
   m_DiffuseTexture: {fileID: 2800000, guid: 5a9cdc73f86893c42a569b61647e9aab, type: 3}
   m_NormalMapTexture: {fileID: 2800000, guid: a5567eb7ffe33a843bf5aaf44f801f07, type: 3}
-  m_MaskMapTexture: {fileID: 0}
+  m_MaskMapTexture: {fileID: 2800000, guid: 847cd6dd52e6cdc40a98e58c714feac8, type: 3}
   m_TileSize: {x: 10, y: 10}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}

@@ -9,7 +9,7 @@ TerrainLayer:
   m_Name: TL_SandGroundDirt
   m_DiffuseTexture: {fileID: 2800000, guid: 4405a5c2a840bfe4aaab85043f597fbd, type: 3}
   m_NormalMapTexture: {fileID: 2800000, guid: 3f45627388da6c44ebaaaa387923e10a, type: 3}
-  m_MaskMapTexture: {fileID: 0}
+  m_MaskMapTexture: {fileID: 2800000, guid: 847cd6dd52e6cdc40a98e58c714feac8, type: 3}
   m_TileSize: {x: 10, y: 10}
   m_TileOffset: {x: 0, y: 0}
   m_Specular: {r: 0, g: 0, b: 0, a: 0}
