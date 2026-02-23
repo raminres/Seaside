@@ -843,7 +843,23 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: SORTIFY;SORTIFY_HIGHLIGHT
+    EmbeddedLinux: SORTIFY;SORTIFY_HIGHLIGHT
+    GameCoreScarlett: SORTIFY;SORTIFY_HIGHLIGHT
+    GameCoreXboxOne: SORTIFY;SORTIFY_HIGHLIGHT
+    Kepler: SORTIFY;SORTIFY_HIGHLIGHT
+    LinuxHeadlessSimulation: SORTIFY;SORTIFY_HIGHLIGHT
+    Nintendo Switch: SORTIFY;SORTIFY_HIGHLIGHT
+    Nintendo Switch 2: SORTIFY;SORTIFY_HIGHLIGHT
+    PS4: SORTIFY;SORTIFY_HIGHLIGHT
+    PS5: SORTIFY;SORTIFY_HIGHLIGHT
+    QNX: SORTIFY;SORTIFY_HIGHLIGHT
+    Standalone: SORTIFY;SORTIFY_HIGHLIGHT
+    VisionOS: SORTIFY;SORTIFY_HIGHLIGHT
+    WebGL: SORTIFY;SORTIFY_HIGHLIGHT
+    XboxOne: SORTIFY;SORTIFY_HIGHLIGHT
+    tvOS: SORTIFY;SORTIFY_HIGHLIGHT
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

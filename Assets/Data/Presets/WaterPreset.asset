@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5be2020af945dac41a3da343feb45042, type: 3}
+  m_Name: WaterPreset
+  m_EditorClassIdentifier: Assembly-CSharp::WaterPreset
+  waterType: 0
+  shallowColor: {r: 0.2, g: 0.5, b: 0.5, a: 1}
+  deepColor: {r: 0, g: 0.1, b: 0.2, a: 1}
+  foamColor: {r: 1, g: 1, b: 1, a: 1}
+  transparency: 0.8
+  primaryWave1:
+    direction: 0
+    wavelength: 10
+    steepness: 0.5
+    speed: 1
+  primaryWave2:
+    direction: 30
+    wavelength: 8
+    steepness: 0.4
+    speed: 1.1
+  primaryWave3:
+    direction: -20
+    wavelength: 6
+    steepness: 0.3
+    speed: 0.9
+  primaryWave4:
+    direction: 45
+    wavelength: 4
+    steepness: 0.2
+    speed: 1.2
+  secondaryWave1:
+    direction: 15
+    wavelength: 2
+    steepness: 0.15
+    speed: 1.5
+  secondaryWave2:
+    direction: -25
+    wavelength: 1.5
+    steepness: 0.1
+    speed: 1.8
+  waveScale: 1
+  waveSpeed: 1
+  normalMap1: {fileID: 2800000, guid: c09976edb5d9fcd4495cc6292c053d21, type: 3}
+  normalMap2: {fileID: 2800000, guid: 8ed40ca606f802e4d9554791f63ce3df, type: 3}
+  normalStrength: 1
+  normalTiling1: {x: 10, y: 10}
+  normalTiling2: {x: 15, y: 15}
+  normalSpeed1: {x: 0.02, y: 0.02}
+  normalSpeed2: {x: -0.015, y: 0.01}
+  depthFadeDistance: 10
+  shallowDepth: 2
+  refractionStrength: 0.1
+  reflectionStrength: 0.5
+  fresnelPower: 4
+  foamTexture: {fileID: 0}
+  foamDepthThreshold: 1
+  foamWaveThreshold: 0.5
+  foamSoftness: 0.3
+  foamTiling: {x: 20, y: 20}
+  foamSpeed: 0.5
+  causticsTexture: {fileID: 2800000, guid: 2bf96000196e0014781c9ffed43c2b51, type: 3}
+  causticsStrength: 0.5
+  causticsScale: 0.1
+  causticsSpeed: 0.2
+  useFlowMap: 0
+  flowMap: {fileID: 0}
+  flowSpeed: 0.5
+  flowStrength: 0.5
+  subsurfaceColor: {r: 0.1, g: 0.4, b: 0.3, a: 1}
+  subsurfaceStrength: 0.5
