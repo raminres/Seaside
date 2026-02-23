@@ -9,7 +9,8 @@ public enum PlayerState
     Jumping,
     Falling,
     Swimming,
-    Interacting
+    Interacting,
+    OnBoat
 }
 
 [RequireComponent(typeof(CharacterController))]
@@ -299,8 +300,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Skip state updates during interaction
-        if (CurrentState == PlayerState.Interacting)
+        // Skip state updates during interaction or when on boat
+        if (CurrentState == PlayerState.Interacting || CurrentState == PlayerState.OnBoat)
             return;
 
         // Ground-based state transitions
@@ -683,6 +684,82 @@ public class PlayerController : MonoBehaviour
         if (direction != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(direction);
+        }
+    }
+
+    #endregion
+
+    #region Boat Interaction
+
+    /// <summary>
+    /// Call this when the boat arrival sequence starts.
+    /// Locks the state machine but allows walking and looking.
+    /// </summary>
+    public void BoardBoat(Transform standPoint, Transform boatRoot)
+    {
+        // Disable temporarily to teleport safely
+        _controller.enabled = false;
+        
+        transform.position = standPoint.position;
+        transform.rotation = standPoint.rotation;
+        _targetRotation = transform.eulerAngles.y;
+        
+        // Ensure camera also snaps so it doesn't try to interpolate from shore to boat
+        if (_cameraTarget != null)
+        {
+            _cinemachineTargetYaw = _cameraTarget.eulerAngles.y;
+            _cinemachineTargetPitch = _cameraTarget.eulerAngles.x;
+        }
+
+        // Parent to boat to inherit general transform position (though we use ApplyExternalMovement for precision)
+        transform.SetParent(boatRoot);
+        
+        _controller.enabled = true;
+        
+        SetState(PlayerState.OnBoat);
+    }
+
+    /// <summary>
+    /// Call this when disembarking. Unparents and restores normal state.
+    /// </summary>
+    public void DisembarkBoat(Transform disembarkPoint)
+    {
+        _controller.enabled = false;
+        
+        transform.position = disembarkPoint.position;
+        transform.rotation = disembarkPoint.rotation;
+        _targetRotation = transform.eulerAngles.y;
+        
+        if (_cameraTarget != null)
+        {
+            _cinemachineTargetYaw = _cameraTarget.eulerAngles.y;
+            _cinemachineTargetPitch = _cameraTarget.eulerAngles.x;
+        }
+
+        transform.SetParent(null);
+        
+        _controller.enabled = true;
+        
+        SetState(PlayerState.Idle);
+    }
+
+    /// <summary>
+    /// Applies delta movement from a moving platform (the boat).
+    /// Called by BoatArrivalController every frame while approaching.
+    /// </summary>
+    public void ApplyExternalMovement(Vector3 deltaPosition, float deltaYaw)
+    {
+        if (_controller.enabled)
+        {
+            // Move physics directly without overriding gravity/walking
+            _controller.Move(deltaPosition);
+        }
+
+        // Manually adjust the camera target so look controls don't drift as the boat turns
+        if (Mathf.Abs(deltaYaw) > 0.001f)
+        {
+            _cinemachineTargetYaw += deltaYaw;
+            _targetRotation += deltaYaw;
         }
     }
 
