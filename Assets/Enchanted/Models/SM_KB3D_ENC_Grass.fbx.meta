@@ -3,7 +3,12 @@ guid: 93a47377d3316a4408dcbbb844cb559f
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_ENC_GrassD
+    second: {fileID: 2100000, guid: 05d7cea8819b1b24ba80ec811b3240a4, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
