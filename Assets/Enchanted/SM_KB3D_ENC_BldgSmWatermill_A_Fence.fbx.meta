@@ -3,7 +3,22 @@ guid: 1249aa1adc0d28b4684f43e2c8d7ab38
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_ENC_MetalForgedGrayA
+    second: {fileID: 2100000, guid: 08fedb55078fdf84c84f7c0e4cb57351, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_ENC_WoodHeartwoodAtlas
+    second: {fileID: 2100000, guid: c862e8dad7b1617488a8180f4fb95fea, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: KB3D_ENC_WoodOldWornBrownA
+    second: {fileID: 2100000, guid: 5f2c57855d31369489321476f693cae7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
