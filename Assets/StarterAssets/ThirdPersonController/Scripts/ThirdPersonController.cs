@@ -1,4 +1,4 @@
-﻿ using UnityEngine;
+﻿using UnityEngine;
 #if ENABLE_INPUT_SYSTEM 
 using UnityEngine.InputSystem;
 #endif
@@ -14,13 +14,6 @@ namespace StarterAssets
 #endif
     public class ThirdPersonController : MonoBehaviour
     {
-        [System.Serializable]
-        public struct SurfaceDefinition
-        {
-            public string surfaceTag;       // e.g., "Wood", "Sand", "Rock"
-            public AudioClip[] footstepClips;
-            public GameObject footstepVFX;  // Optional: Drag a particle prefab here later
-        }
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
         public float MoveSpeed = 2.0f;
@@ -35,11 +28,11 @@ namespace StarterAssets
         [Tooltip("Acceleration and deceleration")]
         public float SpeedChangeRate = 10.0f;
 
+        public AudioSource AudioFootsteps;
+        public AudioSource LandingAudio;
+        public AudioSource AudioFoley;
         public AudioClip LandingAudioClip;
-        
-        [Header("Surface System")]
-        public SurfaceDefinition[] SurfaceDefinitions; // Array to configure Wood, Sand, Rock
-        public SurfaceDefinition DefaultSurface;       // Fallback if no tag matches
+        public AudioClip[] FootstepAudioClips;
         [Range(0, 1)] public float FootstepAudioVolume = 0.5f;
 
         [Space(10)]
@@ -145,7 +138,7 @@ namespace StarterAssets
         private void Start()
         {
             _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-            
+
             _hasAnimator = TryGetComponent(out _animator);
             _controller = GetComponent<CharacterController>();
             _input = GetComponent<StarterAssetsInputs>();
@@ -378,44 +371,16 @@ namespace StarterAssets
                 new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z),
                 GroundedRadius);
         }
-        private void PlayFootstepEffect()
-        {
-            // 1. Raycast down to find the surface
-            RaycastHit hit;
-            // Raycast from slightly above feet (0.1f) to slightly below (-0.5f)
-            if (Physics.Raycast(transform.position + Vector3.up * 0.1f, Vector3.down, out hit, 0.5f, GroundLayers))
-            {
-                // 2. Find the matching surface definition based on the Tag
-                SurfaceDefinition currentSurface = DefaultSurface;
-        
-                foreach (var surface in SurfaceDefinitions)
-                {
-                    if (hit.collider.CompareTag(surface.surfaceTag))
-                    {
-                        currentSurface = surface;
-                        break;
-                    }
-                }
 
-                // 3. Play Random Audio from that surface
-                if (currentSurface.footstepClips != null && currentSurface.footstepClips.Length > 0)
-                {
-                    var index = Random.Range(0, currentSurface.footstepClips.Length);
-                    AudioSource.PlayClipAtPoint(currentSurface.footstepClips[index], transform.TransformPoint(_controller.center), FootstepAudioVolume);
-                }
-
-                // 4. (Future Tech Art) Spawn VFX
-                if (currentSurface.footstepVFX != null)
-                {
-                    Instantiate(currentSurface.footstepVFX, hit.point, Quaternion.LookRotation(hit.normal));
-                }
-            }
-        }
         private void OnFootstep(AnimationEvent animationEvent)
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                PlayFootstepEffect();
+
+                if (AudioFootsteps != null)
+                    AudioFootsteps.Play();
+                if (AudioFoley != null)
+                    AudioFoley.Play();
             }
         }
 
@@ -423,7 +388,9 @@ namespace StarterAssets
         {
             if (animationEvent.animatorClipInfo.weight > 0.5f)
             {
-                AudioSource.PlayClipAtPoint(LandingAudioClip, transform.TransformPoint(_controller.center), FootstepAudioVolume);
+                if (LandingAudio != null)
+                    LandingAudio.Play();
+
             }
         }
     }

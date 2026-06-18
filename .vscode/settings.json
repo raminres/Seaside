@@ -56,5 +56,6 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "Seaside.sln"
+    "dotnet.defaultSolution": "Seaside.sln",
+    "window.autoDetectColorScheme": true
 }

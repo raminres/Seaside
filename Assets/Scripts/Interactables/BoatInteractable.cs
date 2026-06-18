@@ -24,16 +24,37 @@ public class BoatInteractable : InteractableBase
             return;
         }
 
-        // Trigger player disembark sequence
-        player.DisembarkBoat(_disembarkPoint);
-
-        // Tell the arrival controller we've disembarked (to stop boat logic if needed)
-        if (_arrivalController != null)
-        {
-            _arrivalController.OnPlayerDisembarked();
-        }
-
-        // Disable this interactable so we can't get back on (one-way trip)
+        // Disable this interactable so we can't trigger it again during transition
         SetInteractable(false);
+
+        // If ScreenFade is available, perform transition fade
+        if (ScreenFade.Instance != null)
+        {
+            ScreenFade.Instance.FadeOut(0.5f, () =>
+            {
+                // Teleport the player
+                player.DisembarkBoat(_disembarkPoint);
+
+                // Notify arrival controller
+                if (_arrivalController != null)
+                {
+                    _arrivalController.OnPlayerDisembarked();
+                }
+
+                // Fade back in
+                ScreenFade.Instance.FadeIn(0.5f);
+            });
+        }
+        else
+        {
+            // Fallback (immediate disembark if screen fade is missing)
+            player.DisembarkBoat(_disembarkPoint);
+
+            if (_arrivalController != null)
+            {
+                _arrivalController.OnPlayerDisembarked();
+            }
+        }
     }
 }
+
