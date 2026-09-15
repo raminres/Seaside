@@ -17,6 +17,7 @@ public class BoatArrivalController : MonoBehaviour
     [Header("Player Settings")]
     [SerializeField] private Transform _playerStandPoint;
     [SerializeField] private BoatInteractable _boatInteractable;
+    [SerializeField] private JourneyProgressService _journeyProgress;
 
     [Header("Events")]
     [SerializeField] private GameEventSo _onArrivalDocked;
@@ -57,7 +58,17 @@ public class BoatArrivalController : MonoBehaviour
             return;
         }
 
-        if (!_sequence.Begin(arrivalAlreadyComplete: false)) return;
+        bool arrivalAlreadyComplete = _journeyProgress != null &&
+                                    _journeyProgress.HasCompletedAction(JourneyActionIds.ArrivalComplete);
+        if (!_sequence.Begin(arrivalAlreadyComplete))
+        {
+            if (_sequence.State == ArrivalSequenceState.Skipped)
+            {
+                transform.SetPositionAndRotation(_endPoint.position, _endPoint.rotation);
+            }
+
+            return;
+        }
 
         // Snap boat to start
         transform.position = _startPoint.position;
@@ -147,6 +158,7 @@ public class BoatArrivalController : MonoBehaviour
 
         // Player has left the boat, we can clear the reference so we stop applying delta updates
         _player = null;
+        _journeyProgress?.CompleteAction(JourneyActionIds.ArrivalComplete);
         _onArrivalCompleted?.RaiseEvent();
         return true;
     }

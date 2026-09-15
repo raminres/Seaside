@@ -100,6 +100,14 @@ The repository, not a chat transcript, is the source of truth between agent or d
 * Raise progress changes through ScriptableObject event channels. Interactions must be idempotent: restoring a save, revisiting an object, or receiving a repeated event must not duplicate rewards or replay the ending.
 * Treat a clean compilation as insufficient. A gameplay change is complete only after its applicable live Unity route is verified in an advancing Game view and any remaining limitation is recorded in the handoff.
 
+### Project decision register (maintain as decisions are made)
+
+* Record every durable product or technical decision twice: keep the concise constraint here, and add dated context, evidence, and the current next action to `Docs/VSCodeHandoff.md`. Do not turn either file into a verbatim chat transcript.
+* The first durable gameplay-systems milestone is a versioned local journey save with stable IDs for checkpoints, inventory, discovered notes, and completed one-shot actions. `arrival_complete` is one such completed action; New Journey clears it and a continuation skips the boat approach.
+* The arrival route remains provisional until its scene references and transforms are authored and a fresh journey plus a restored journey are exercised in an advancing Game view. Do not declare it shipped from unit tests or compilation alone.
+* The prototype collectible counter is not an ending or narrative-progress system. Replace or isolate it before it can affect the authored route.
+* Test on the owner's iPhone 15 and iPad mini (6th generation). The owner builds on a MacBook Air M4 and currently reports stable 60 FPS; treat that as a reported baseline, not a profiling result. Capture representative on-device evidence before final performance claims or quality cuts.
+
 ### Before ending a meaningful work session
 
 Update `Docs/VSCodeHandoff.md` in the same change set. Record concise, verifiable facts:

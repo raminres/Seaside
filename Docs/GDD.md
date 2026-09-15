@@ -93,9 +93,9 @@ Create portfolio breakdowns showing inputs, Shader Graph/HLSL structure, effect 
 
 ## Performance targets and testing
 
-Provisional targets: 60 FPS at 1080p on a named PC test configuration, and sustained 30 FPS on a named baseline iPhone, with 60 FPS optional on suitable devices. These are targets, not measurements. Select the baseline devices before final quality tuning.
+Target sustained 60 FPS on the iPhone 15 and iPad mini (6th generation), with the project built from the owner's MacBook Air M4. The owner currently reports stable 60 FPS in the existing build; this is a baseline observation, not a profiler capture. Before final quality decisions, capture representative on-device evidence for a complete route and record build settings, thermal state, and the measured frame-time behavior.
 
-Budget around 16.7 ms per PC frame and 33.3 ms per baseline mobile frame. Record CPU/GPU time, memory, transparent overdraw, and thermal behavior along the same route. Scale shadows, render scale, water detail and VFX density using quality profiles. Verify effects on Metal hardware; package presence alone does not prove device support or acceptable performance.
+Budget around 16.7 ms per frame on both target iOS devices. Record CPU/GPU time, memory, transparent overdraw, and thermal behavior along the same route. Scale shadows, render scale, water detail and VFX density using quality profiles if either device cannot sustain the target. Verify effects on Metal hardware; package presence alone does not prove device support or acceptable performance.
 
 An iOS release requires a Mac/Xcode signing and device-validation stage. The current Windows audit does not establish an iOS build result.
 
@@ -105,10 +105,10 @@ An iOS release requires a Mac/Xcode signing and device-validation stage. The cur
 2. Required interactions cannot soft-lock the journey, including when notes are found out of order.
 3. Pause, restart, return-to-menu and a second journey work without stale state or duplicate managers.
 4. Checkpoint continuation survives application restart and mobile background/resume.
-5. PC and a named iPhone meet the agreed sustained performance target on a complete route.
+5. The iPhone 15 and iPad mini (6th generation) meet the agreed sustained performance target on a complete route.
 6. No unhandled exceptions, missing scripts, or broken materials during that route.
 7. Build instructions, controls, asset credits and a short technical art breakdown accompany the deliverable.
 
 ## Creative decisions to revisit after the first playable route
 
-Confirm the protagonist's relationship to the keeper, final narrative tone, whether to retain third-person for release, baseline iPhone/PC hardware, and whether narration will be recorded. None prevents the audit or a reversible route prototype.
+Confirm the protagonist's relationship to the keeper, final narrative tone, whether to retain third-person for release, and whether narration will be recorded. None prevents the audit or a reversible route prototype.
