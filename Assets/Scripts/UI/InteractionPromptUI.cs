@@ -60,13 +60,13 @@ public class InteractionPromptUI : MonoBehaviour
         // Auto-find PlayerInteraction if not assigned
         if (_playerInteraction == null)
         {
-            _playerInteraction = FindFirstObjectByType<PlayerInteraction>();
+            _playerInteraction = FindAnyObjectByType<PlayerInteraction>();
         }
 
         // Auto-find PlayerInput if not assigned
         if (_playerInput == null)
         {
-            _playerInput = FindFirstObjectByType<PlayerInput>();
+            _playerInput = FindAnyObjectByType<PlayerInput>();
         }
 
         // Subscribe to control scheme changes

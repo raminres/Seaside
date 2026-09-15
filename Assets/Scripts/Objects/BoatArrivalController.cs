@@ -59,7 +59,7 @@ public class BoatArrivalController : MonoBehaviour
         _previousRotation = transform.rotation;
 
         // Find and attach player
-        _player = FindFirstObjectByType<PlayerController>();
+        _player = FindAnyObjectByType<PlayerController>();
         if (_player != null && _playerStandPoint != null)
         {
             _player.BoardBoat(_playerStandPoint, this.transform);

@@ -57,12 +57,17 @@ public class FireStarter : InteractableBase
         get
         {
             if (_isLit) return _litPrompt;
-            if (_requiresItem && !HasMatches) return _noItemPrompt;
+            if (_requiresItem && !HasRequiredItem()) return _noItemPrompt;
             return _lightPrompt;
         }
     }
 
-    public override bool CanInteract => !_isLit && (!_requiresItem || HasMatches);
+    public override bool CanInteract => !_isLit && (!_requiresItem || HasRequiredItem());
+
+    private bool HasRequiredItem()
+    {
+        return string.Equals(_requiredItemId, "Matches", System.StringComparison.OrdinalIgnoreCase) && HasMatches;
+    }
 
     protected override void OnInteractInternal(PlayerController player)
     {

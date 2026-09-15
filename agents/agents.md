@@ -78,3 +78,28 @@ This file serves as a system instruction and developer guide for any AI coding a
 4.  **Performance Check:** Avoid `Find` or `GetComponent` inside `Update()` calls. Pre-cache reference components in `Awake()`, `Start()`, or `OnEnable()`.
 5.  **Editor Operations:** Wrap editor-only APIs (like `AssetDatabase` or `EditorUtility`) inside `#if UNITY_EDITOR` blocks to avoid build failures.
 6.  **Clean Log Outputs:** Prefix diagnostic messages with class names (e.g., `Debug.Log("[GameManager] Transitioning to Playing State")`).
+
+---
+
+## 🧭 7. Session Continuity Protocol (Required)
+
+The repository, not a chat transcript, is the source of truth between agent or developer sessions. Treat [Docs/VSCodeHandoff.md](../Docs/VSCodeHandoff.md) as the canonical, durable handoff record.
+
+### On every new session
+
+1. Read this file, then `Docs/VSCodeHandoff.md`, `Docs/BaselineAudit.md`, and `Docs/CompletionPlan.md` before making changes.
+2. Run `git status --short --branch`; never revert, reset, stage, or overwrite existing work unless the user explicitly requests it.
+3. Confirm the connected Unity Editor and its compilation state using the commands documented in `Docs/VSCodeHandoff.md`.
+4. Resume only the highest-priority unfinished item recorded in the handoff, unless the user gives a newer instruction.
+
+### Before ending a meaningful work session
+
+Update `Docs/VSCodeHandoff.md` in the same change set. Record concise, verifiable facts:
+
+* active branch and whether it tracks a remote;
+* files/features changed, including key configuration choices;
+* exact verification commands and their result;
+* known errors, warnings, blockers, and work intentionally not performed;
+* the single recommended next action.
+
+Do not rely on memory, summaries, or assumptions. If any fact is unknown, mark it as unverified rather than guessing. Keep the handoff current even when work is uncommitted; Git history complements the handoff but does not replace it.

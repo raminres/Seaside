@@ -50,7 +50,7 @@ public class MobileControlsManager : MonoBehaviour
 
     private void SyncWithPlayerController()
     {
-        var playerController = FindFirstObjectByType<PlayerController>();
+        var playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null && IsMobileControlsEnabled)
         {
             // Use reflection or public method to set mobile input mode
@@ -87,31 +87,17 @@ public class MobileControlsManager : MonoBehaviour
 
     private bool ShouldEnableMobileControls()
     {
-        #if UNITY_EDITOR
-            if (_enableInEditor)
-            {
-                return true;
-            }
-            
-            // In editor, check for touch simulation
-            if (_autoDetectTouch && Touchscreen.current != null)
-            {
-                return true;
-            }
-            
-            return false;
-        #elif UNITY_IOS
-            return _enableOnIOS;
-        #elif UNITY_ANDROID
-            return _enableOnAndroid;
-        #else
-            // Desktop/Console - check for touch if auto-detect is on
-            if (_autoDetectTouch && Touchscreen.current != null)
-            {
-                return true;
-            }
-            return false;
-        #endif
+        if (Application.isEditor)
+        {
+            return _enableInEditor || (_autoDetectTouch && Touchscreen.current != null);
+        }
+
+        return Application.platform switch
+        {
+            RuntimePlatform.IPhonePlayer => _enableOnIOS,
+            RuntimePlatform.Android => _enableOnAndroid,
+            _ => _autoDetectTouch && Touchscreen.current != null
+        };
     }
 
     /// <summary>
@@ -161,11 +147,7 @@ public class MobileControlsManager : MonoBehaviour
     /// </summary>
     public static bool IsMobilePlatform()
     {
-        #if UNITY_IOS || UNITY_ANDROID
-            return true;
-        #else
-            return false;
-        #endif
+        return Application.isMobilePlatform;
     }
 
     /// <summary>

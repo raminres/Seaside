@@ -33,6 +33,8 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
     public virtual float HoldDuration => _holdDuration;
 
     protected bool _isFocused;
+    private MaterialPropertyBlock _outlinePropertyBlock;
+    private int _outlinePropertyId;
 
     public virtual void Interact(PlayerController player)
     {
@@ -58,14 +60,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
             _highlightObject.SetActive(true);
         }
 
-        if (_outlineRenderer != null)
-        {
-            var material = _outlineRenderer.material;
-            if (material.HasProperty(_outlinePropertyName))
-            {
-                material.SetFloat(_outlinePropertyName, _outlineWidth);
-            }
-        }
+        SetOutlineWidth(_outlineWidth);
 
         _onFocused?.Invoke();
     }
@@ -80,14 +75,7 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
             _highlightObject.SetActive(false);
         }
 
-        if (_outlineRenderer != null)
-        {
-            var material = _outlineRenderer.material;
-            if (material.HasProperty(_outlinePropertyName))
-            {
-                material.SetFloat(_outlinePropertyName, 0f);
-            }
-        }
+        SetOutlineWidth(0f);
 
         _onUnfocused?.Invoke();
     }
@@ -115,5 +103,17 @@ public abstract class InteractableBase : MonoBehaviour, IInteractable
     public void SetPrompt(string newPrompt)
     {
         _interactionPrompt = newPrompt;
+    }
+
+    private void SetOutlineWidth(float width)
+    {
+        if (_outlineRenderer == null || string.IsNullOrWhiteSpace(_outlinePropertyName)) return;
+        if (_outlineRenderer.sharedMaterial == null || !_outlineRenderer.sharedMaterial.HasProperty(_outlinePropertyName)) return;
+
+        _outlinePropertyBlock ??= new MaterialPropertyBlock();
+        _outlinePropertyId = Shader.PropertyToID(_outlinePropertyName);
+        _outlineRenderer.GetPropertyBlock(_outlinePropertyBlock);
+        _outlinePropertyBlock.SetFloat(_outlinePropertyId, width);
+        _outlineRenderer.SetPropertyBlock(_outlinePropertyBlock);
     }
 }

@@ -19,7 +19,7 @@ public class MobileControlsUI : MonoBehaviour
     {
         if (_playerInput == null)
         {
-            _playerInput = FindFirstObjectByType<PlayerInput>();
+            _playerInput = FindAnyObjectByType<PlayerInput>();
         }
 
         if (_playerInput != null)

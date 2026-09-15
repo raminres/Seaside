@@ -11,7 +11,6 @@ public class SeatInteractable : InteractableBase
     [Header("Seat Settings")]
     [SerializeField] private Transform _sitPoint;
     [SerializeField] private float _moveToSeatDuration = 0.3f;
-    [SerializeField] private bool _canLookAroundWhileSitting = true;
 
     [Header("Prompts")]
     [SerializeField] private string _sitPrompt = "Sit";
@@ -171,7 +170,7 @@ public class SeatInteractable : InteractableBase
         }
         
         // Get mobile input handler for stand up detection
-        _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+        _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>();
         if (_mobileInputHandler != null)
         {
             if (_debugLog) Debug.Log("[SeatInteractable] Found MobileInputHandler");
@@ -203,7 +202,7 @@ public class SeatInteractable : InteractableBase
 
         while (_transitionProgress < 1f)
         {
-            _transitionProgress += Time.deltaTime / _moveToSeatDuration;
+            _transitionProgress += Time.deltaTime / Mathf.Max(_moveToSeatDuration, Mathf.Epsilon);
             float t = Mathf.SmoothStep(0f, 1f, _transitionProgress);
 
             player.transform.position = Vector3.Lerp(_transitionStartPos, _sitPoint.position, t);
@@ -272,7 +271,7 @@ public class SeatInteractable : InteractableBase
 
         while (_transitionProgress < 1f)
         {
-            _transitionProgress += Time.deltaTime / _moveToSeatDuration;
+            _transitionProgress += Time.deltaTime / Mathf.Max(_moveToSeatDuration, Mathf.Epsilon);
             float t = Mathf.SmoothStep(0f, 1f, _transitionProgress);
 
             player.transform.position = Vector3.Lerp(_transitionStartPos, standPosition, t);

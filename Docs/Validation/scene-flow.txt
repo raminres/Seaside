@@ -1,0 +1,16 @@
+2026-09-15 07:09:26Z
+PASS: Initial menu state
+PASS: Exactly one level button callback
+PASS: Two same-frame clicks produce one completed load
+PASS: Configured gameplay scene is active
+PASS: Gameplay state and time scale
+PASS: Exactly one persistent GameManager
+PASS: Pause state/time/cursor
+PASS: Resume state/time
+PASS: Return to menu
+PASS: Second journey loads once
+PASS: Second menu return
+PASS: Two distinct additive loads finish; duplicate requests are ignored
+PASS: Both requested scenes loaded and state restored
+PASS: Final cleanup returns to a single menu scene
+PASS: All scene-flow checks completed.

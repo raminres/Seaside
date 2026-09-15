@@ -40,7 +40,7 @@ public class PauseMenuController : MonoBehaviour
             audioSource.ignoreListenerPause = true;
         }
 
-        _mobileControlsManager = FindFirstObjectByType<MobileControlsManager>();
+        _mobileControlsManager = FindAnyObjectByType<MobileControlsManager>();
     }
 
     private void Start()
@@ -76,7 +76,7 @@ public class PauseMenuController : MonoBehaviour
 
     private void FindPlayerReferences()
     {
-        _playerController = FindFirstObjectByType<PlayerController>();
+        _playerController = FindAnyObjectByType<PlayerController>();
         if (_playerController == null)
         {
             Debug.LogWarning("PlayerController not found. Player movement won't be disabled during pause.");
