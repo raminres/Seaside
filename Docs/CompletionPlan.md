@@ -26,7 +26,7 @@ Exit: two consecutive sessions through all existing mechanics, without exception
 
 ## Milestone 2 — Complete greybox journey
 
-- [ ] Create the persistent Main/content scene layout through Unity, keeping the mechanics sandbox.
+- [ ] Extend `LV_TestScene` into the complete journey, retaining it as the gameplay bootstrap and mechanics sandbox. Revisit an additive content-scene split only when the route proves it necessary.
 - [ ] Block out dock → settlement → coast → lighthouse with clear landmarks and collision.
 - [ ] Implement stable narrative IDs, note reading/journal and explicit finale progression.
 - [ ] Stage three essential clues and the two lighthouse actions.
@@ -68,4 +68,4 @@ Exit: meet the GDD definition of complete. Editor compilation alone does not clo
 
 Connection restored after the owner opened Seaside. GameManager startup/loading fixes and the level-button callback correction are saved and tested. A technical-debt pass also removed obsolete object lookups, shared-material mutation in interaction effects, and runtime skybox asset mutation. The Editor was left stopped on `LV_TestScene`. See [validation results](Validation/README.md) and the [VS Code handoff](VSCodeHandoff.md).
 
-Next action: verify the project path and current scene, then unify menu/test-scene manager configuration and run the complete boat/interactions regression. Build the narrative route on the existing settlement and lighthouse. Read [BaselineAudit.md](BaselineAudit.md) and [VSCodeHandoff.md](VSCodeHandoff.md) before changing settings.
+Next action: run the menu-to-`LV_TestScene` route in a normally advancing Game view, then compare it with a direct `LV_TestScene` start before changing serialized manager settings. Build the narrative route on the existing settlement and lighthouse. Read [BaselineAudit.md](BaselineAudit.md), [VSCodeHandoff.md](VSCodeHandoff.md), and [GDD.md](GDD.md) before changing settings.

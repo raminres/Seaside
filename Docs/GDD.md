@@ -69,7 +69,7 @@ Main menu: New Journey, Continue when a checkpoint exists, Options, Credits. Kee
 
 Follow `agents/agents.md`: ScriptableObject event channels connect independent systems; interactables derive from the existing interface/base class; DayNightCycle owns ambient light, fog, and sun/moon settings.
 
-Proposed scene structure: a persistent `Main` scene for player, camera, services, and UI, with island content loaded additively through GameManager. This structure is documented in the older notes but does not yet exist in the repository. Implement it only after the current menu-to-test-scene baseline works, preserving LV_TestScene as a mechanics sandbox.
+Current scene structure: `LV_MainMenu` is the release entry scene and `LV_TestScene` is the gameplay bootstrap, containing the player, camera, services, UI, and playable island foundation. Complete the first journey by extending `LV_TestScene`; retain it as the mechanics sandbox as the route is authored. Additive content scenes are an optional later refactor, justified only if scene scale or loading requires them. Do not create or rename a `Main` scene merely to match older notes.
 
 Separate narrative progress from GameManager's prototype collectible counter. Store discovered note IDs, inventory flags, completed action IDs, checkpoint ID, and time-of-day in a versioned local save. Restore progress before enabling interactions. A new journey explicitly clears runtime progression, including static item flags.
 

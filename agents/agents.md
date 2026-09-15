@@ -15,8 +15,9 @@ This file serves as a system instruction and developer guide for any AI coding a
 *   For global manager singletons that coordinate runtime services, inherit from `Seaside.Core.Singleton<T>` (e.g., [AudioManager](file:///c:/Users/ramin/Desktop/Repos/Seaside/Assets/Scripts/Core/AudioManager.cs)). Ensure `DontDestroyOnLoad` behavior is handled safely in `Awake()`.
 
 ### Scene Lifecycle
-*   Maintain the persistent gameplay scene structure. The `Main` scene houses the player, persistent managers, and UI.
-*   Always load and unload game levels additively using [GameManager.Instance.LoadLevelAdditive()](file:///c:/Users/ramin/Desktop/Repos/Seaside/Assets/Scripts/GameManager.cs).
+*   The current release entry is `LV_MainMenu`; `LV_TestScene` is the current gameplay bootstrap, housing the player, persistent managers, UI, and island foundation. Do not create or rename a `Main` scene merely to follow older notes.
+*   Keep the menu and direct-`LV_TestScene` entry paths behaviorally equivalent. Before expanding scene flow, reconcile their `GameManager` configuration and verify the route in a normally advancing Game view.
+*   Additive loading through [GameManager.Instance.LoadLevelAdditive()](file:///c:/Users/ramin/Desktop/Repos/Seaside/Assets/Scripts/GameManager.cs) is available for a later content-scene split; it is not a requirement for the first complete route.
 *   Use the `onLoadProgress` float event to drive loading screens or progress bars.
 
 ---
@@ -87,10 +88,16 @@ The repository, not a chat transcript, is the source of truth between agent or d
 
 ### On every new session
 
-1. Read this file, then `Docs/VSCodeHandoff.md`, `Docs/BaselineAudit.md`, and `Docs/CompletionPlan.md` before making changes.
+1. Read this file, then `Docs/VSCodeHandoff.md`, `Docs/BaselineAudit.md`, `Docs/CompletionPlan.md`, and `Docs/GDD.md` before making changes.
 2. Run `git status --short --branch`; never revert, reset, stage, or overwrite existing work unless the user explicitly requests it.
 3. Confirm the connected Unity Editor and its compilation state using the commands documented in `Docs/VSCodeHandoff.md`.
 4. Resume only the highest-priority unfinished item recorded in the handoff, unless the user gives a newer instruction.
+
+### Narrative progression safeguards
+
+* Keep route progress as stable, save-owned IDs (for example, notes discovered and actions completed); never use static fields or the prototype collectible count as narrative truth.
+* Raise progress changes through ScriptableObject event channels. Interactions must be idempotent: restoring a save, revisiting an object, or receiving a repeated event must not duplicate rewards or replay the ending.
+* Treat a clean compilation as insufficient. A gameplay change is complete only after its applicable route is verified in an advancing Game view and any remaining limitation is recorded in the handoff.
 
 ### Before ending a meaningful work session
 
