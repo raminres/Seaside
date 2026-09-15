@@ -14,6 +14,9 @@ public class MainMenuController : MonoBehaviour
     public GameObject levelSelectionCanvas;
     public Animator levelSelectionAnimator;
 
+    [Header("Journey")]
+    [SerializeField] private Button _continueButton;
+
     [Header("Animator Controllers")]
     public Animator mainMenuAnimator;
     public Animator optionsAnimator;
@@ -62,6 +65,7 @@ public class MainMenuController : MonoBehaviour
 
         // Load saved FPS setting
         InitializeFPSToggle();
+        ConfigureContinueButton();
     }
 
     #region FPS Settings
@@ -166,11 +170,44 @@ public class MainMenuController : MonoBehaviour
 
     public void StartGame()
     {
+        JourneyProgressService progress = GameManager.Instance != null
+            ? GameManager.Instance.GetComponent<JourneyProgressService>()
+            : null;
+        progress?.StartNewJourney();
+
         PlayClickSound();
         StartCoroutine(PlayDisappearAnimation(mainMenuCanvas, mainMenuAnimator, () =>
         {
             GameManager.Instance.ShowLevelSelection();
         }));
+    }
+
+    public void ContinueJourney()
+    {
+        JourneyProgressService progress = GameManager.Instance != null
+            ? GameManager.Instance.GetComponent<JourneyProgressService>()
+            : null;
+
+        if (progress == null || !progress.HasCheckpoint) return;
+
+        PlayClickSound();
+        GameManager.Instance.LoadLevel(0);
+    }
+
+    private void ConfigureContinueButton()
+    {
+        if (_continueButton == null) return;
+
+        JourneyProgressService progress = GameManager.Instance != null
+            ? GameManager.Instance.GetComponent<JourneyProgressService>()
+            : null;
+        bool canContinue = progress != null && progress.HasCheckpoint;
+
+        _continueButton.gameObject.SetActive(canContinue);
+        if (!canContinue) return;
+
+        _continueButton.onClick.RemoveAllListeners();
+        _continueButton.onClick.AddListener(ContinueJourney);
     }
 
     public void ShowOptions()

@@ -19,6 +19,9 @@ public class BoatArrivalController : MonoBehaviour
     [SerializeField] private BoatInteractable _boatInteractable;
     [SerializeField] private JourneyProgressService _journeyProgress;
 
+    [Header("Progress")]
+    [SerializeField] private string _arrivalCheckpointId = "arrival_landing";
+
     [Header("Events")]
     [SerializeField] private GameEventSo _onArrivalDocked;
     [SerializeField] private GameEventSo _onArrivalCompleted;
@@ -158,7 +161,11 @@ public class BoatArrivalController : MonoBehaviour
 
         // Player has left the boat, we can clear the reference so we stop applying delta updates
         _player = null;
-        _journeyProgress?.CompleteAction(JourneyActionIds.ArrivalComplete);
+        if (_journeyProgress != null)
+        {
+            _journeyProgress.CompleteAction(JourneyActionIds.ArrivalComplete);
+            _journeyProgress.SetCheckpoint(_arrivalCheckpointId, 0f);
+        }
         _onArrivalCompleted?.RaiseEvent();
         return true;
     }
