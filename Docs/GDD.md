@@ -42,6 +42,10 @@ Use a few concrete objects and short texts rather than exposition-heavy dialogue
 
 The route must remain navigable at night. Advance the day/night system gently between authored mood targets; do not force players to wait for a particular hour or punish slow exploration. Retain a separate full-cycle demonstration for the portfolio.
 
+### Arrival sequence
+
+On a fresh journey, start the player aboard the approaching boat. Camera look remains enabled, but movement, jumping, sprinting, and the exit interaction remain unavailable until the boat reaches its dock. Docking unlocks movement on the stationary deck and presents the appropriate movement tutorial for the active control scheme. The player then uses one contextual disembark interaction, which completes `arrival_complete`. A continuation or replay after that checkpoint starts on land and never replays the approach; New Journey clears the flag. The exact boat start/end transforms and land checkpoint are authored scene data, not inferred from the current boat artwork.
+
 ## Core loop
 
 Observe a landmark → explore a small area → inspect a clue → perform a readable interaction → see the world change → discover the next landmark.

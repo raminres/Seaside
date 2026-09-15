@@ -19,11 +19,17 @@ public class BoatArrivalController : MonoBehaviour
     [SerializeField] private BoatInteractable _boatInteractable;
 
     [Header("Events")]
+    [SerializeField] private GameEventSo _onArrivalDocked;
+    [SerializeField] private GameEventSo _onArrivalCompleted;
     [SerializeField] private UnityEvent _onArrived;
 
     private PlayerController _player;
     private bool _isApproaching;
     private float _approachTimer;
+    private readonly ArrivalSequenceStateMachine _sequence = new();
+
+    public ArrivalSequenceState ArrivalState => _sequence.State;
+    public bool CanDisembark => _sequence.CanDisembark;
 
     // We track the boat's previous position to apply delta movement to the player
     private Vector3 _previousPosition;
@@ -50,6 +56,8 @@ public class BoatArrivalController : MonoBehaviour
             Debug.LogError("[BoatArrivalController] Start or End point missing!");
             return;
         }
+
+        if (!_sequence.Begin(arrivalAlreadyComplete: false)) return;
 
         // Snap boat to start
         transform.position = _startPoint.position;
@@ -115,6 +123,8 @@ public class BoatArrivalController : MonoBehaviour
 
     private void CompleteArrival()
     {
+        if (!_sequence.Dock()) return;
+
         _isApproaching = false;
 
         // Snap exactly to end
@@ -126,12 +136,18 @@ public class BoatArrivalController : MonoBehaviour
             _boatInteractable.SetInteractable(true);
         }
 
+        _player?.ReleaseBoatMovement();
+        _onArrivalDocked?.RaiseEvent();
         _onArrived?.Invoke();
     }
 
-    public void OnPlayerDisembarked()
+    public bool OnPlayerDisembarked()
     {
+        if (!_sequence.Disembark()) return false;
+
         // Player has left the boat, we can clear the reference so we stop applying delta updates
         _player = null;
+        _onArrivalCompleted?.RaiseEvent();
+        return true;
     }
 }

@@ -744,6 +744,17 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
+    /// Unlocks normal locomotion once a stationary boat has docked while
+    /// retaining the boat parent until the player uses its exit interaction.
+    /// </summary>
+    public void ReleaseBoatMovement()
+    {
+        if (CurrentState != PlayerState.OnBoat) return;
+
+        SetState(IsGrounded ? PlayerState.Idle : PlayerState.Falling);
+    }
+
+    /// <summary>
     /// Applies delta movement from a moving platform (the boat).
     /// Called by BoatArrivalController every frame while approaching.
     /// </summary>

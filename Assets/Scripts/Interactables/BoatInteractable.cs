@@ -18,6 +18,11 @@ public class BoatInteractable : InteractableBase
 
     protected override void OnInteractInternal(PlayerController player)
     {
+        if (_arrivalController != null && !_arrivalController.CanDisembark)
+        {
+            return;
+        }
+
         if (_disembarkPoint == null)
         {
             Debug.LogWarning("[BoatInteractable] No disembark point assigned!");
