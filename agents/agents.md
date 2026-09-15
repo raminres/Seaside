@@ -114,6 +114,7 @@ The repository, not a chat transcript, is the source of truth between agent or d
 * The first complete route is land-based: arrival, movement tutorial, optional sit/read reflection, persistent matches and campfire, fire-rain path, then the lighthouse upper-stairs ending. Swimming is currently disabled prototype code using a global Y-plane and is explicitly out of scope until a volume-based, mobile-tested design is approved.
 * Every authored one-shot interaction needs a stable save-owned ID and restore behaviour. `FireStarter.HasMatches`, local `_isCollected`/`_isLit` fields, and the prototype collectible counter must not become narrative truth.
 * Test on the owner's iPhone 15 and iPad mini (6th generation). The owner builds on a MacBook Air M4 and currently reports stable 60 FPS; treat that as a reported baseline, not a profiling result. Capture representative on-device evidence before final performance claims or quality cuts.
+* iOS builds target both iPhone and iPad, with a minimum iOS version of 26.0. Keep device-family support and this deployment target aligned with the owner's iPhone 15 and iPad mini (6th generation) validation.
 
 ### Before ending a meaningful work session
 
