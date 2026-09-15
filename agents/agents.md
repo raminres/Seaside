@@ -13,6 +13,7 @@ This file serves as a system instruction and developer guide for any AI coding a
 
 ### Persistent Singleton Pattern
 *   For global manager singletons that coordinate runtime services, inherit from `Seaside.Core.Singleton<T>` (e.g., [AudioManager](file:///c:/Users/ramin/Desktop/Repos/Seaside/Assets/Scripts/Core/AudioManager.cs)). Ensure `DontDestroyOnLoad` behavior is handled safely in `Awake()`.
+*   Do not introduce another persistent manager to solve scene-entry issues. Reconcile the serialized `GameManager` settings already present in `LV_MainMenu` and `LV_TestScene`, then verify both entry paths before adding services.
 
 ### Scene Lifecycle
 *   The current release entry is `LV_MainMenu`; `LV_TestScene` is the current gameplay bootstrap, housing the player, persistent managers, UI, and island foundation. Do not create or rename a `Main` scene merely to follow older notes.
@@ -95,9 +96,9 @@ The repository, not a chat transcript, is the source of truth between agent or d
 
 ### Narrative progression safeguards
 
-* Keep route progress as stable, save-owned IDs (for example, notes discovered and actions completed); never use static fields or the prototype collectible count as narrative truth.
+* Keep route progress as stable, instance-owned and save-owned IDs (for example, notes discovered and actions completed). Never use static fields such as `FireStarter.HasMatches`, or the prototype collectible count, as narrative truth.
 * Raise progress changes through ScriptableObject event channels. Interactions must be idempotent: restoring a save, revisiting an object, or receiving a repeated event must not duplicate rewards or replay the ending.
-* Treat a clean compilation as insufficient. A gameplay change is complete only after its applicable route is verified in an advancing Game view and any remaining limitation is recorded in the handoff.
+* Treat a clean compilation as insufficient. A gameplay change is complete only after its applicable live Unity route is verified in an advancing Game view and any remaining limitation is recorded in the handoff.
 
 ### Before ending a meaningful work session
 
