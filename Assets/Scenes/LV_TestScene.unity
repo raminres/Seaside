@@ -9602,6 +9602,7 @@ GameObject:
   m_Component:
   - component: {fileID: 971373068}
   - component: {fileID: 971373069}
+  - component: {fileID: 971373070}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -9637,16 +9638,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   gameState: {fileID: 11400000, guid: 081301c3b0042b14699a035b037d6934, type: 2}
-  onGameStateChangeEvent: {fileID: 0}
+  onGameStateChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198, type: 2}
   onGamePaused: {fileID: 11400000, guid: 7d02f063ca755454ebf4961c83e41382, type: 2}
   onGameResumed: {fileID: 11400000, guid: 5a747b2ffd88b1e40a0e099f7dec2f8c, type: 2}
   mainMenuSceneName: LV_MainMenu
-  persistentGameplayScene: 
+  persistentGameplayScene: LV_TestScene
   levelScenes:
   - LV_TestScene
   onLoadProgress: {fileID: 11400000, guid: 17f72cd3495e86c46a4765a508e6e4b7, type: 2}
-  useAdditiveLoading: 1
-  onVolumeChangeEvent: {fileID: 0}
+  useAdditiveLoading: 0
+  onVolumeChangeEvent: {fileID: 11400000, guid: 4aafe7064555fe945b4f744d7b18f198, type: 2}
   collectiblePrefab: {fileID: 0}
   collectibleCount: 10
   minX: -10
@@ -9657,6 +9658,20 @@ MonoBehaviour:
   collectibleAudio: {fileID: 0}
   levelSelectionCanvas: {fileID: 0}
   levelSelectionAnimator: {fileID: 0}
+--- !u!114 &971373070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 971373067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc62e56edab61a34abdc46cf73eb2857, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JourneyProgressService
+  _saveFileName: journey_progress.json
+  _onJourneyProgressChanged: {fileID: 11400000, guid: 5812f73f8c1f38b4d95a4da4656e99ea, type: 2}
 --- !u!1001 &987837986
 PrefabInstance:
   m_ObjectHideFlags: 0
