@@ -35,6 +35,9 @@ public class DayNightCycle : MonoBehaviour
     private bool _wasDaytime;
     private bool _wasNoon;
     private bool _wasMidnight;
+    private Material _runtimeSkyboxMaterial;
+    private Material _runtimeSkyboxSource;
+    private Material _previousSkyboxMaterial;
 
     // Properties
     public float CurrentTime => _currentTime;
@@ -64,7 +67,8 @@ public class DayNightCycle : MonoBehaviour
 
     private void UpdateTime()
     {
-        float timeProgressionRate = 24f / (_preset.dayLengthMinutes * 60f);
+        float dayLengthSeconds = Mathf.Max(_preset.dayLengthMinutes * 60f, Mathf.Epsilon);
+        float timeProgressionRate = 24f / dayLengthSeconds;
         _currentTime += Time.deltaTime * timeProgressionRate;
 
         if (_currentTime >= 24f)
@@ -149,8 +153,10 @@ public class DayNightCycle : MonoBehaviour
         if (_preset.skyboxExposure == null) return;
         if (string.IsNullOrEmpty(_preset.skyboxExposureParam)) return;
 
-        float exposure = _preset.skyboxExposure.Evaluate(t);
-        _preset.skyboxMaterial.SetFloat(_preset.skyboxExposureParam, exposure);
+        Material skybox = GetRuntimeSkyboxMaterial();
+        if (skybox == null || !skybox.HasProperty(_preset.skyboxExposureParam)) return;
+
+        skybox.SetFloat(_preset.skyboxExposureParam, _preset.skyboxExposure.Evaluate(t));
     }
 
     private void CheckTimeEvents()
@@ -226,6 +232,45 @@ public class DayNightCycle : MonoBehaviour
     {
         _preset = newPreset;
         UpdateLighting();
+    }
+
+    private Material GetRuntimeSkyboxMaterial()
+    {
+        if (!Application.isPlaying)
+        {
+            return null;
+        }
+
+        if (_runtimeSkyboxMaterial == null || _runtimeSkyboxSource != _preset.skyboxMaterial)
+        {
+            if (_runtimeSkyboxMaterial != null)
+            {
+                Destroy(_runtimeSkyboxMaterial);
+            }
+
+            _previousSkyboxMaterial ??= RenderSettings.skybox;
+            _runtimeSkyboxSource = _preset.skyboxMaterial;
+            _runtimeSkyboxMaterial = new Material(_runtimeSkyboxSource)
+            {
+                name = $"{_runtimeSkyboxSource.name} (Runtime)"
+            };
+            RenderSettings.skybox = _runtimeSkyboxMaterial;
+        }
+
+        return _runtimeSkyboxMaterial;
+    }
+
+    private void OnDestroy()
+    {
+        if (RenderSettings.skybox == _runtimeSkyboxMaterial)
+        {
+            RenderSettings.skybox = _previousSkyboxMaterial;
+        }
+
+        if (_runtimeSkyboxMaterial != null)
+        {
+            Destroy(_runtimeSkyboxMaterial);
+        }
     }
 
     /// <summary>

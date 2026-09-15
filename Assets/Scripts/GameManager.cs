@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
     public bool IsPaused => CurrentState == GameState.Paused;
     public bool IsPlaying => CurrentState == GameState.Playing;
 
-    private List<AsyncOperation> _loadOperations = new();
+    public bool IsLoading { get; private set; }
 
     #region Unity Lifecycle
 
@@ -78,21 +78,17 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
     
-        // Ensure we're in MainMenu state when starting from main menu scene
-        if (SceneManager.GetActiveScene().name == mainMenuSceneName)
-        {
-            if (gameState != null)
-            {
-                gameState.CurrentState = GameState.MainMenu;
-            }
-        }
-    
-        UpdateCursorState();
+        // The initial sceneLoaded event occurs before Start, so initialize it explicitly.
+        Scene initialScene = SceneManager.GetActiveScene();
+        OnSceneLoaded(initialScene, LoadSceneMode.Single);
+        ChangeGameState(initialScene.name == mainMenuSceneName
+            ? GameState.MainMenu : GameState.Playing);
     }
 
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (Instance == this) Instance = null;
     }
     private void ClearMainMenuReferences()
     {
@@ -122,7 +118,7 @@ public class GameManager : MonoBehaviour
     }
     private void AssignLevelSelectionUI()
     {
-        MainMenuController mainMenu = FindFirstObjectByType<MainMenuController>(FindObjectsInactive.Include);
+        MainMenuController mainMenu = FindAnyObjectByType<MainMenuController>(FindObjectsInactive.Include);
     
         if (mainMenu != null)
         {
@@ -222,6 +218,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void LoadLevel(int levelIndex)
     {
+        if (IsLoading) return;
+
         if (levelIndex < 0 || levelIndex >= levelScenes.Length)
         {
             Debug.LogError($"Invalid level index: {levelIndex}");
@@ -234,9 +232,39 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            SceneManager.LoadScene(levelScenes[levelIndex]);
+            if (!CanLoadScene(levelScenes[levelIndex])) return;
+            StartCoroutine(LoadSingleLevelAsync(levelScenes[levelIndex]));
+        }
+    }
+
+    private IEnumerator LoadSingleLevelAsync(string sceneName)
+    {
+        IsLoading = true;
+        try
+        {
+            onLoadProgress?.RaiseEvent(0f);
+            var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            while (!operation.isDone)
+            {
+                onLoadProgress?.RaiseEvent(Mathf.Clamp01(operation.progress / 0.9f));
+                yield return null;
+            }
+            onLoadProgress?.RaiseEvent(1f);
             ChangeGameState(GameState.Playing);
         }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private bool CanLoadScene(string sceneName)
+    {
+        if (!string.IsNullOrWhiteSpace(sceneName) && Application.CanStreamedLevelBeLoaded(sceneName))
+            return true;
+
+        Debug.LogError($"[GameManager] Scene '{sceneName}' is not available in Build Settings.");
+        return false;
     }
 
     /// <summary>
@@ -244,75 +272,56 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void LoadLevelAdditive(params string[] sceneNames)
     {
-        StartCoroutine(LoadLevelAdditiveAsync(sceneNames));
+        if (IsLoading || sceneNames == null || sceneNames.Length == 0) return;
+
+        // Validate the whole request before unloading anything or changing game state.
+        var requestedScenes = new List<string>();
+        if (!string.IsNullOrEmpty(persistentGameplayScene))
+            requestedScenes.Add(persistentGameplayScene);
+
+        foreach (string sceneName in sceneNames)
+        {
+            if (!CanLoadScene(sceneName)) return;
+            if (!requestedScenes.Contains(sceneName)) requestedScenes.Add(sceneName);
+        }
+        if (!string.IsNullOrEmpty(persistentGameplayScene) && !CanLoadScene(persistentGameplayScene)) return;
+
+        StartCoroutine(LoadLevelAdditiveAsync(requestedScenes));
     }
 
-    private IEnumerator LoadLevelAdditiveAsync(string[] sceneNames)
+    private IEnumerator LoadLevelAdditiveAsync(List<string> sceneNames)
     {
-        ChangeGameState(GameState.MainMenu); // Use MainMenu state during loading for cursor
-        _loadOperations.Clear();
-
-        // First, load the persistent gameplay scene if not already loaded
-        if (!string.IsNullOrEmpty(persistentGameplayScene) && !IsSceneLoaded(persistentGameplayScene))
+        IsLoading = true;
+        try
         {
-            var mainOp = SceneManager.LoadSceneAsync(persistentGameplayScene, LoadSceneMode.Single);
-            mainOp.allowSceneActivation = false;
-            _loadOperations.Add(mainOp);
-        }
+            ChangeGameState(GameState.MainMenu);
+            onLoadProgress?.RaiseEvent(0f);
 
-        // Queue all additive scenes
-        foreach (var sceneName in sceneNames)
-        {
-            if (string.IsNullOrEmpty(sceneName) || IsSceneLoaded(sceneName)) continue;
+            for (int i = 0; i < sceneNames.Count; i++)
+            {
+                string sceneName = sceneNames[i];
+                if (!IsSceneLoaded(sceneName))
+                {
+                    LoadSceneMode mode = sceneName == persistentGameplayScene
+                        ? LoadSceneMode.Single : LoadSceneMode.Additive;
+                    // Finish activation before queuing the next load. Holding a scene at
+                    // 0.9 with allowSceneActivation=false stalls Unity's async queue.
+                    var operation = SceneManager.LoadSceneAsync(sceneName, mode);
+                    while (!operation.isDone)
+                    {
+                        onLoadProgress?.RaiseEvent((i + Mathf.Clamp01(operation.progress / 0.9f)) / sceneNames.Count);
+                        yield return null;
+                    }
+                }
+                onLoadProgress?.RaiseEvent((i + 1f) / sceneNames.Count);
+            }
 
-            var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-            op.allowSceneActivation = false;
-            _loadOperations.Add(op);
-        }
-
-        if (_loadOperations.Count == 0)
-        {
             ChangeGameState(GameState.Playing);
-            yield break;
         }
-
-        // Wait and report progress
-        float totalProgress = 0f;
-        int opCount = _loadOperations.Count;
-        
-        while (totalProgress < 0.9f * opCount)
+        finally
         {
-            totalProgress = 0f;
-            foreach (var op in _loadOperations)
-            {
-                totalProgress += op.progress;
-            }
-
-            float normalizedProgress = totalProgress / (opCount * 0.9f);
-            onLoadProgress?.RaiseEvent(normalizedProgress);
-
-            yield return null;
+            IsLoading = false;
         }
-
-        // Activate all scenes
-        foreach (var op in _loadOperations)
-        {
-            op.allowSceneActivation = true;
-        }
-
-        // Wait for all to complete
-        foreach (var op in _loadOperations)
-        {
-            while (!op.isDone)
-            {
-                yield return null;
-            }
-        }
-
-        onLoadProgress?.RaiseEvent(1f);
-        yield return new WaitForSeconds(0.1f);
-
-        ChangeGameState(GameState.Playing);
     }
 
     /// <summary>
@@ -331,21 +340,30 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void ReturnToMainMenu()
     {
+        if (IsLoading || !CanLoadScene(mainMenuSceneName)) return;
         StartCoroutine(ReturnToMainMenuAsync());
     }
 
     private IEnumerator ReturnToMainMenuAsync()
     {
-        Time.timeScale = 1f;
-        
-        var op = SceneManager.LoadSceneAsync(mainMenuSceneName, LoadSceneMode.Single);
-        while (!op.isDone)
+        IsLoading = true;
+        try
         {
-            onLoadProgress?.RaiseEvent(op.progress);
-            yield return null;
+            Time.timeScale = 1f;
+            onLoadProgress?.RaiseEvent(0f);
+            var op = SceneManager.LoadSceneAsync(mainMenuSceneName, LoadSceneMode.Single);
+            while (!op.isDone)
+            {
+                onLoadProgress?.RaiseEvent(Mathf.Clamp01(op.progress / 0.9f));
+                yield return null;
+            }
+            onLoadProgress?.RaiseEvent(1f);
+            ChangeGameState(GameState.MainMenu);
         }
-
-        ChangeGameState(GameState.MainMenu);
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     private bool IsSceneLoaded(string sceneName)

@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour
 
         if (_mainCamera == null)
         {
-            _mainCamera = FindFirstObjectByType<Camera>();
+            _mainCamera = FindAnyObjectByType<Camera>();
         }
 
         _jumpTimeoutDelta = _jumpTimeout;
@@ -130,7 +130,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         // Check MobileControlsManager first to determine if we should use mobile input
-        var mobileControlsManager = FindFirstObjectByType<MobileControlsManager>();
+        var mobileControlsManager = FindAnyObjectByType<MobileControlsManager>();
         if (mobileControlsManager != null && mobileControlsManager.IsMobileControlsEnabled)
         {
             _useMobileInput = true;
@@ -141,12 +141,12 @@ public class PlayerController : MonoBehaviour
         if (_mobileInputHandler == null && _useMobileInput)
         {
             // First try to find active handler
-            _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>();
             
             // If not found, try to find inactive one (in case canvas was disabled)
             if (_mobileInputHandler == null)
             {
-                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>(FindObjectsInactive.Include);
+                _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>(FindObjectsInactive.Include);
             }
             
             if (_mobileInputHandler == null)
@@ -476,7 +476,7 @@ public class PlayerController : MonoBehaviour
             // Try to find handler if not yet found
             if (_mobileInputHandler == null)
             {
-                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+                _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>();
             }
             
             if (_mobileInputHandler != null)
@@ -494,7 +494,7 @@ public class PlayerController : MonoBehaviour
             // Try to find handler if not yet found
             if (_mobileInputHandler == null)
             {
-                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+                _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>();
             }
             
             if (_mobileInputHandler != null)
@@ -512,7 +512,7 @@ public class PlayerController : MonoBehaviour
             // Try to find handler if not yet found
             if (_mobileInputHandler == null)
             {
-                _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+                _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>();
             }
             
             if (_mobileInputHandler != null)

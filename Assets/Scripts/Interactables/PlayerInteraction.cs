@@ -46,12 +46,12 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (_interactionPromptUI == null)
         {
-            _interactionPromptUI = FindFirstObjectByType<InteractionPromptUI>();
+            _interactionPromptUI = FindAnyObjectByType<InteractionPromptUI>();
         }
 
         if (_mobileInputHandler == null)
         {
-            _mobileInputHandler = FindFirstObjectByType<MobileInputHandler>();
+            _mobileInputHandler = FindAnyObjectByType<MobileInputHandler>();
             
             if (_mobileInputHandler != null && _debugLog)
             {

@@ -35,7 +35,6 @@ public class CollectibleItem : InteractableBase
 
     private Vector3 _startPosition;
     private bool _isCollected = false;
-    private AudioSource _audioSource;
 
     private void Awake()
     {

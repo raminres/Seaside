@@ -3,35 +3,44 @@ using UnityEngine.InputSystem;
 
 public class SofaColorChanger : MonoBehaviour
 {
-    public Renderer sofaRenderer;
-    public Color[] colors;
-    private int currentColorIndex = 0;
+    [SerializeField] private Renderer sofaRenderer;
+    [SerializeField] private Color[] colors;
+    private int currentColorIndex;
     private PlayerInput playerInput;
     private InputAction changeColorAction;
+    private MaterialPropertyBlock propertyBlock;
 
     void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
-        changeColorAction = playerInput.actions["ChangeColor"];
+        changeColorAction = playerInput != null ? playerInput.actions.FindAction("ChangeColor", false) : null;
+        propertyBlock = new MaterialPropertyBlock();
     }
 
     void OnEnable()
     {
-        changeColorAction.performed += OnChangeColor;
+        if (changeColorAction != null) changeColorAction.performed += OnChangeColor;
     }
 
     void OnDisable()
     {
-        changeColorAction.performed -= OnChangeColor;
+        if (changeColorAction != null) changeColorAction.performed -= OnChangeColor;
     }
 
     public void OnChangeColor(InputAction.CallbackContext context)
     {
-        currentColorIndex = (currentColorIndex + 1) % colors.Length;
+        if (sofaRenderer == null || colors == null || colors.Length == 0) return;
 
-        if (sofaRenderer != null)
-        {
-            sofaRenderer.material.color = colors[currentColorIndex];
-        }
+        currentColorIndex = (currentColorIndex + 1) % colors.Length;
+        Material material = sofaRenderer.sharedMaterial;
+        if (material == null) return;
+
+        int colorPropertyId = material.HasProperty("_BaseColor")
+            ? Shader.PropertyToID("_BaseColor")
+            : Shader.PropertyToID("_Color");
+        propertyBlock ??= new MaterialPropertyBlock();
+        sofaRenderer.GetPropertyBlock(propertyBlock);
+        propertyBlock.SetColor(colorPropertyId, colors[currentColorIndex]);
+        sofaRenderer.SetPropertyBlock(propertyBlock);
     }
 }
